@@ -704,6 +704,12 @@ config HPH_HIGHPERF
 	bool "Sysfs for headphone high performance mode"
 	default n
 
+config BLX
+	bool "Support for Battery Life eXtender"
+	default n
+	help
+	  Say Y here to enable Battery Life eXtender
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"

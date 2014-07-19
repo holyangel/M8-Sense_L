@@ -29,6 +29,11 @@
 #include <mach/devices_cmdline.h>
 #include <mach/devices_dtb.h>
 #include <linux/qpnp/qpnp-charger.h>
+#ifdef CONFIG_BLX
+#include <linux/blx.h>
+
+int soc_level;
+#endif
 
 #define USB_MA_0       (0)
 #define USB_MA_500     (500)
@@ -226,6 +231,8 @@ static int htc_battery_get_charging_status(void)
 	charger = battery_core_info.rep.charging_source;
 	mutex_unlock(&battery_core_info.info_lock);
 
+	soc_level = battery_core_info.rep.level;
+
 	if (battery_core_info.rep.batt_id == 255)
 		charger = CHARGER_UNKNOWN;
 
@@ -341,6 +348,10 @@ static ssize_t htc_battery_set_full_level_dis_batt_chg(struct device *dev,
 	rc = strict_strtoul(buf, 10, &percent);
 	if (rc)
 		return rc;
+
+#ifdef CONFIG_BLX
+	percent = get_charginglimit();
+#endif
 
 	if (percent > 100 || percent == 0)
 		return -EINVAL;
@@ -1304,12 +1315,23 @@ int htc_battery_core_update_changed(void)
 	battery_core_info.rep.batt_state = new_batt_info_rep.batt_state;
 #endif
 
+#ifdef CONFIG_BLX
+	soc_level = battery_core_info.rep.level;
+
+	if (soc_level >= get_charginglimit())
+		htc_battery_charger_disable();
+#endif
+
 	if (battery_core_info.rep.charging_source == CHARGER_BATTERY)
 		battery_core_info.htc_charge_full = 0;
 	else {
 		if (battery_core_info.htc_charge_full &&
 				(battery_core_info.rep.level == 100))
 			battery_core_info.htc_charge_full = 1;
+#ifdef CONFIG_BLX
+		else if (battery_core_info.rep.level >= get_charginglimit())
+			battery_core_info.htc_charge_full = 1;
+#endif
 		else {
 			if (battery_core_info.rep.level == 100)
 				battery_core_info.htc_charge_full = 1;
