@@ -231,8 +231,6 @@ static int htc_battery_get_charging_status(void)
 	charger = battery_core_info.rep.charging_source;
 	mutex_unlock(&battery_core_info.info_lock);
 
-	soc_level = battery_core_info.rep.level;
-
 	if (battery_core_info.rep.batt_id == 255)
 		charger = CHARGER_UNKNOWN;
 
@@ -348,10 +346,6 @@ static ssize_t htc_battery_set_full_level_dis_batt_chg(struct device *dev,
 	rc = strict_strtoul(buf, 10, &percent);
 	if (rc)
 		return rc;
-
-#ifdef CONFIG_BLX
-	percent = get_charginglimit();
-#endif
 
 	if (percent > 100 || percent == 0)
 		return -EINVAL;
@@ -1195,6 +1189,10 @@ int htc_battery_core_update_changed(void)
 	static int batt_temp_over_68c_count = 0;
 	unsigned int dbg_cfg = 0 ;
 
+#ifdef CONFIG_BLX
+	int rc;
+#endif
+
 	if (battery_register) {
 		BATT_ERR("No battery driver exists.");
 		return -1;
@@ -1320,6 +1318,13 @@ int htc_battery_core_update_changed(void)
 
 	if (soc_level >= get_charginglimit())
 		htc_battery_charger_disable();
+	else {
+		rc = battery_core_info.func.func_charger_control(ENABLE_CHARGER);
+		if (rc) {
+			BATT_ERR("charger control failed!");
+			return -1;
+		}
+	}
 #endif
 
 	if (battery_core_info.rep.charging_source == CHARGER_BATTERY)
@@ -1328,10 +1333,6 @@ int htc_battery_core_update_changed(void)
 		if (battery_core_info.htc_charge_full &&
 				(battery_core_info.rep.level == 100))
 			battery_core_info.htc_charge_full = 1;
-#ifdef CONFIG_BLX
-		else if (battery_core_info.rep.level >= get_charginglimit())
-			battery_core_info.htc_charge_full = 1;
-#endif
 		else {
 			if (battery_core_info.rep.level == 100)
 				battery_core_info.htc_charge_full = 1;
