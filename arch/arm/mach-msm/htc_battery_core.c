@@ -1316,9 +1316,9 @@ int htc_battery_core_update_changed(void)
 #ifdef CONFIG_BLX
 	soc_level = battery_core_info.rep.level;
 
-	if (soc_level >= get_charginglimit()) {
-		htc_battery_charger_disable();
-		soc_flag = 1;
+	if ((soc_level >= get_charginglimit()) && (soc_level != 100)) {
+			htc_battery_charger_disable();
+			soc_flag = 1;
 	} else if ((soc_level < get_charginglimit()) && (soc_flag)) {
 		rc = battery_core_info.func.func_charger_control(ENABLE_CHARGER);
 		if (rc) {
