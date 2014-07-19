@@ -700,6 +700,10 @@ config QPNP_VIBRATOR_PWM
 		PMIC GPIO line and PWM wave can be configured by the PWM registers.
 		It uses the android timed-output framework.
 
+config HPH_HIGHPERF
+	bool "Sysfs for headphone high performance mode"
+	default n
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
