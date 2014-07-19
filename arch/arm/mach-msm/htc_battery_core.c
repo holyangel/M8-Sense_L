@@ -32,7 +32,7 @@
 #ifdef CONFIG_BLX
 #include <linux/blx.h>
 
-int soc_level;
+int soc_level, soc_flag;
 #endif
 
 #define USB_MA_0       (0)
@@ -1316,14 +1316,16 @@ int htc_battery_core_update_changed(void)
 #ifdef CONFIG_BLX
 	soc_level = battery_core_info.rep.level;
 
-	if (soc_level >= get_charginglimit())
+	if (soc_level >= get_charginglimit()) {
 		htc_battery_charger_disable();
-	else {
+		soc_flag = 1;
+	} else if ((soc_level < get_charginglimit()) && (soc_flag)) {
 		rc = battery_core_info.func.func_charger_control(ENABLE_CHARGER);
 		if (rc) {
 			BATT_ERR("charger control failed!");
 			return -1;
 		}
+		soc_flag = 0;
 	}
 #endif
 
