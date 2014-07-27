@@ -40,6 +40,11 @@ int soc_level, soc_flag;
 unsigned int phone_call_stat;
 #endif
 
+#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_WAKE_GESTURES
+#include <linux/synaptics_i2c_rmi.h>
+unsigned int phone_call_stat;
+#endif
+
 #define USB_MA_0       (0)
 #define USB_MA_500     (500)
 #define USB_MA_1500    (1500)
