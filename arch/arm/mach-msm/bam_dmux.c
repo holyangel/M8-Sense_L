@@ -1605,13 +1605,8 @@ static void ul_timeout(struct work_struct *work)
 	if (in_global_reset)
 		return;
 	ret = write_trylock_irqsave(&ul_wakeup_lock, flags);
-<<<<<<< HEAD
-	if (!ret) { 
-		schedule_delayed_work(&ul_timeout_work,
-=======
 	if (!ret) { /* failed to grab lock, reschedule and bail */
 		queue_delayed_work(system_power_efficient_wq, &ul_timeout_work,
->>>>>>> 78054e2... msm: bam_dmux: Use power efficient workqueues for
 				msecs_to_jiffies(UL_TIMEOUT_DELAY));
 		return;
 	}
