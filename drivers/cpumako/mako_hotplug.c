@@ -234,7 +234,7 @@ static void __ref decide_hotplug_func(struct work_struct *work)
 	}
 
 	for (cpu = 0; cpu < 2; cpu++)
-		cur_load += avg_cpu_nr_running(cpu);
+		cur_load += cpufreq_quick_get_util(cpu);
 
 	if (cur_load >= (t->load_threshold << 1)) {
 		if (statsm.counter < t->max_load_counter)
@@ -580,7 +580,8 @@ static int __devinit mako_hotplug_probe(struct platform_device *pdev)
 	int ret = 0;
 	struct hotplug_tunables *t = &tunables;
 
-	wq = alloc_workqueue("mako_hotplug_workqueue", WQ_FREEZABLE, 1);
+	wq = alloc_workqueue("mako_hotplug_workqueue",
+				WQ_HIGHPRI | WQ_UNBOUND, 1);
 
 	if (!wq) {
 		ret = -ENOMEM;
