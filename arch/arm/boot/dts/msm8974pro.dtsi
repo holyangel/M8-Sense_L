@@ -27,6 +27,7 @@
 		compatible = "qcom,android-usb";
 		reg = <0xfe8050c8 0xc8>;
 		qcom,android-usb-swfi-latency = <1>;
+		qcom,android-usb-uicc-nluns = /bits/ 8 <1>;
 	};
 
 	qcom,msm-imem@fe805000 {
@@ -1726,10 +1727,7 @@
 			< 2265600 1728000 7448 /* 931 MHz */ >,
 			< 2342400 1728000 7448 /* 931 MHz */ >,
 			< 2419200 1728000 7448 /* 931 MHz */ >,
-			< 2457600 1728000 7448 /* 931 MHz */ >,
-			< 2572800 1728000 7448 /* 931 MHz */ >,
-			< 2726400 1728000 7448 /* 931 MHz */ >,
-			< 2880000 1728000 7448 /* 931 MHz */ >;
+			< 2457600 1728000 7448 /* 931 MHz */ >;
 	};
 
 	i2c@f9928000 { /* BLSP-1 QUP-6 */
@@ -1755,7 +1753,7 @@
 	qcom,chipid = <0x03030002>;
 	qcom,msm-bus,num-cases = <15>;
 	qcom,bus-control;
-	qcom,initial-pwrlevel = <3>;
+	qcom,initial-pwrlevel = <4>;
 
 	/* Updated bus bandwidth requirements */
 	qcom,msm-bus,vectors-KBps =
@@ -1819,7 +1817,7 @@
 
                qcom,gpu-pwrlevel@3 {
                        reg = <3>;
-                       qcom,gpu-freq = <320000000>;
+                       qcom,gpu-freq = <330000000>;
                        qcom,bus-freq = <5>;
                        qcom,io-fraction = <101>;
                };
@@ -1841,6 +1839,7 @@
 };
 
 &mdss_mdp {
+	qcom,max-bandwidth-low-kbps = <2750000>;
 	qcom,vbif-settings = <0x0004 0x00000001>;
 
 	qcom,mdss-wb-off = <0x00011100 0x00011500
@@ -1851,6 +1850,7 @@
 	qcom,mdss-has-bwc;
 	qcom,mdss-has-decimation;
 	qcom,mdss-ad-off = <0x0013100 0x00013300>;
+	vdd-cx-supply = <&pm8841_s2_corner>;
 };
 
 &mdss_hdmi_tx {
@@ -1864,7 +1864,7 @@
 	qcom,vidc-ns-map = <0x40000000 0x40000000>;
 	qcom,load-freq-tbl = <1036800 465000000>,
 		<783360 465000000>,
-		<489600 266670000>,
+		<360000 266670000>,
 		<244800 133330000>;
 	qcom,reg-presets = <0x80004 0x1>,
 		<0x80070 0x11FFF>,
@@ -1885,7 +1885,7 @@
 	qcom,dec-ocmem-ab-ib = <0 0>,
 		<176000 519000>,
 		<456000 519000>,
-		<864000 519000>,
+		<864000 629000>,
 		<1728000 1038000>,
 		<2766000 1661000>,
 		<3456000 2076000>,
@@ -1934,6 +1934,10 @@
 &memory_hole {
 	qcom,memblock-remove = <0x05a00000 0x7800000
 				0x0fa00000 0x500000>; /* Address and size of the hole */
+};
+
+&gdsc_venus {		
+	qcom,skip-logic-collapse;		
 };
 
 &sdhc_1 {
