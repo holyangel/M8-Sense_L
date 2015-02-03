@@ -2394,6 +2394,8 @@ source "drivers/cpumako/Kconfig"
 
 endmenu
 
+source "drivers/cpuquiet/Kconfig"
+
 config CPU_FREQ_MSM
         bool
         depends on CPU_FREQ && ARCH_MSM
