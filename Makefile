@@ -195,7 +195,7 @@ export KBUILD_BUILDHOST := $(SUBARCH)
 ARCH		?= $(SUBARCH)
 CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 ARCH		:= arm
-CROSS_COMPILE	:= /home/android/android/arm-eabi-4.9/bin/arm-eabi-
+CROSS_COMPILE	:= /home/holyangel/android/toolchains/saber4.9/bin/arm-eabi-
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -353,12 +353,13 @@ CC		= $(srctree)/scripts/gcc-wrapper.py $(REAL_CC)
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
+
 MODFLAGS        = -DMODULE \
                   -mfpu=neon-vfpv4 \
                   -mtune=cortex-a15 \
 		  -fgcse-las \
 		  -fpredictive-commoning \
-                  -Ofast
+                  -O3 -floop-nest-optimize -fgcse-lm -fgcse-sm -fivopts
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
@@ -366,17 +367,18 @@ CFLAGS_KERNEL	= -mfpu=neon-vfpv4 \
                   -mtune=cortex-a15 \
 		  -fgcse-las \
 		  -fpredictive-commoning \
-                  -Ofast \
+                  -O3 -fvariable-expansion-in-unroller \
 		  -fgcse-lm \
 		  -fgcse-sm \
-		  -fsched-spec-load \
-		  -fsingle-precision-constant
+		  -fsched-spec-load -fivopts \
+		  -DNDEBUG -pipe -mcpu=cortex-a15 -marm -ftree-vectorize -mvectorize-with-neon-quad \
+		  -floop-nest-optimize -Wno-maybe-uninitialized -fsingle-precision-constant \
+		  -fforce-addr -funroll-loops -floop-interchange -floop-strip-mine \
+		  -floop-block -fgcse-las
 
-ifeq ($(ENABLE_GRAPHITE),true)
-CFLAGS_KERNEL	+= -Ofast -munaligned-access -Wall -Wno-maybe-uninitialized -fgcse-lm -fgcse-sm -fsingle-precision-constant -fforce-addr -fsched-spec-load -mtune=cortex-a15 -mcpu=cortex-a15 -marm -mfpu=neon-vfpv4 -ftree-vectorize -mvectorize-with-neon-quad -funroll-loops -fpredictive-commoning -ffast-math -fgraphite -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -fomit-frame-pointer -fgcse-las -Wmissing-prototypes -Wstrict-prototypes
-endif
 AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
+
 
 
 # Use LINUXINCLUDE when you must reference the include/ directory.
@@ -392,17 +394,23 @@ CFLAGS_A15 = -mtune=cortex-a15 -mfpu=neon -funsafe-math-optimizations
 CFLAGS_MODULO = -fmodulo-sched -fmodulo-sched-allow-regmoves
 KERNEL_MODS        = $(CFLAGS_A15) $(CFLAGS_MODULO)
 
-KBUILD_CFLAGS   := -Ofast -funswitch-loops \
-		   -Wundef -Wstrict-prototypes -Wno-trigraphs \
-		   -fno-strict-aliasing -fno-common \
-		   -Werror-implicit-function-declaration \
-		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks
-		   -mtune=cortex-a15 -mfpu=neon-vfpv4 \
-		   -funsafe-math-optimizations -ftree-vectorize \
-		   -fno-delete-null-pointer-checks
-KBUILD_AFLAGS_KERNEL :=
-KBUILD_CFLAGS_KERNEL :=
+KBUILD_CFLAGS := -O3 \
+		-Wundef -Wstrict-prototypes -Wno-trigraphs \
+		-fno-strict-aliasing -fno-common \
+		-Werror-implicit-function-declaration \
+		-Wno-format-security \
+		-fno-delete-null-pointer-checks
+		-mtune=cortex-a15 -mfpu=neon-vfpv4 \
+		-ftree-vectorize \
+		-pipe -DNDEBUG -mcpu=cortex-a15 -marm \
+		-ftree-vectorize -mvectorize-with-neon-quad \
+		-fgcse-lm -fgcse-sm -fsingle-precision-constant \
+		-fforce-addr -fsched-spec-load \
+		-floop-nest-optimize -fivopts\
+		-fgcse-lm -fgcse-sm -fvariable-expansion-in-unroller \
+		-floop-strip-mine -floop-block -floop-flatten
+KBUILD_AFLAGS_KERNEL := $(CFLAGS_KERNEL)
+KBUILD_CFLAGS_KERNEL := $(CFLAGS_KERNEL)
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_AFLAGS_MODULE  := -DMODULE
 KBUILD_CFLAGS_MODULE  := -DMODULE
@@ -593,11 +601,8 @@ all: vmlinux
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS	+= -Ofast
-ifeq ($(ENABLE_GRAPHITE),true)
-KBUILD_CFLAGS	+= -Ofast -fgraphite -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
-endif
-endif
+KBUILD_CFLAGS	+= -O3 $(call cc-disable-warning,maybe-uninitialized,) -floop-nest-optimize -floop-strip-mine -floop-block
+endif 
 
 include $(srctree)/arch/$(SRCARCH)/Makefile
 
