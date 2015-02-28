@@ -2390,8 +2390,6 @@ endif
 
 source "drivers/cpuidle/Kconfig"
 
-source "drivers/cpumako/Kconfig"
-
 endmenu
 
 config CPU_FREQ_MSM
