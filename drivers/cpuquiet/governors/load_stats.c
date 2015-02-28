@@ -56,6 +56,8 @@ static struct workqueue_struct *load_stats_wq;
 static unsigned int load_threshold[8] = {90, 80, 80, 70, 70, 60, 60, 50};
 static unsigned int twts_threshold[8] = {70, 0, 70, 120, 70, 120, 0, 120};
 
+extern unsigned int get_rq_info(void);
+
 static u64 input_boost_end_time = 0;
 static bool input_boost_running = false;
 static unsigned int input_boost_duration = 3 * 70; /* ms */
@@ -234,6 +236,7 @@ static void update_load_stats_state(void)
 	}
 	total_time += this_time;
 	load = report_load();
+	rq_depth = get_rq_info();
 	nr_cpu_online = num_online_cpus();
 	load_stats_state = IDLE;
 
