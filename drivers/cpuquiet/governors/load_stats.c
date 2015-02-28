@@ -64,8 +64,6 @@ static unsigned int input_boost_enabled = true;
 static bool input_boost_task_alive = false;
 static struct task_struct *input_boost_task;
 
-extern unsigned int get_rq_info(void);
-
 static unsigned int rq_depth_threshold = 40;
 static unsigned int rq_depth_load_threshold = 70;
 static unsigned int rq_depth_cpus_threshold = 4;
@@ -236,7 +234,6 @@ static void update_load_stats_state(void)
 	}
 	total_time += this_time;
 	load = report_load();
-	rq_depth = get_rq_info();
 	nr_cpu_online = num_online_cpus();
 	load_stats_state = IDLE;
 
