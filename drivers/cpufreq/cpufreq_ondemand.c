@@ -1166,10 +1166,6 @@ static void boost_min_freq(int min_freq)
 
 static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 {
-	/* Extrapolated load of this CPU */
-	unsigned int load_at_max_freq = 0;
-	/* Current load across this CPU */
-	unsigned int cur_load = 0;
 	unsigned int max_load_freq;
 	unsigned int max_load_other_cpu = 0;
 	struct cpufreq_policy *policy;
@@ -1195,7 +1191,7 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	for_each_cpu(j, policy->cpus) {
 		cputime64_t cur_wall_time, cur_idle_time, cur_iowait_time;
 		unsigned int idle_time, wall_time, iowait_time;
-		unsigned int load_freq;
+		unsigned int load_freq, cur_load;
 		int freq_avg;
 
 		j_dbs_info = &per_cpu(od_cpu_dbs_info, j);
@@ -1276,10 +1272,6 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 	else
 		up_threshold = up_threshold_level[1];
 
-	/* calculate the scaled load across CPU */
-	load_at_max_freq = (cur_load * policy->cur)/policy->max;
-
-	cpufreq_notify_utilization(policy, load_at_max_freq);
 	
 	if (max_load_freq > up_threshold * policy->cur) {
 		unsigned int freq_next;
