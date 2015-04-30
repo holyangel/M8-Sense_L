@@ -1,0 +1,96 @@
+&mdss_dsi0 {
+	vddlcmio-supply = <&pm8916_l15>;
+	htc,panel-supply-entries {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		htc,panel-supply-entry@2 {
+			reg = <2>;
+			htc,supply-name = "vddlcmio";
+			htc,supply-min-voltage = <1800000>;
+			htc,supply-max-voltage = <1800000>;
+			htc,supply-enable-load = <100000>;
+			htc,supply-disable-load = <100>;
+		};
+	};
+};
+
+&mdss_mdp {
+	qcom,mdss_dsi_m8ql_tianma_renesas_63315_1080p_video {
+		compatible = "qcom,mdss-dsi-panel";
+		status = "disable";
+		qcom,cont-splash-enabled;
+		qcom,mdss-dsi-panel-name = "M8ql 1080p_Tianma /Renesas 63315 video mode dsi panel";
+		qcom,mdss-dsi-panel-controller = <&mdss_dsi0>;
+		qcom,mdss-dsi-panel-type = "dsi_video_mode";
+		qcom,mdss-dsi-panel-destination = "display_1";
+		qcom,mdss-dsi-panel-framerate = <60>;
+		qcom,mdss-dsi-virtual-channel-id = <0>;
+		qcom,mdss-dsi-stream = <0>;
+		qcom,mdss-dsi-panel-width = <1080>;
+		qcom,mdss-dsi-panel-height = <1920>;
+		qcom,mdss-dsi-h-front-porch = <123>;
+		qcom,mdss-dsi-h-back-porch = <68>;
+		qcom,mdss-dsi-h-pulse-width = <20>;
+		qcom,mdss-dsi-h-sync-skew = <0>;
+		qcom,mdss-dsi-v-back-porch = <4>;
+		qcom,mdss-dsi-v-front-porch = <3>;
+		qcom,mdss-dsi-v-pulse-width = <2>;
+		qcom,mdss-dsi-h-left-border = <0>;
+		qcom,mdss-dsi-h-right-border = <0>;
+		qcom,mdss-dsi-v-top-border = <0>;
+		qcom,mdss-dsi-v-bottom-border = <0>;
+		qcom,mdss-dsi-bpp = <24>;
+		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
+		qcom,mdss-dsi-underflow-color = <0xFF>;
+		qcom,mdss-dsi-border-color = <0>;
+		htc-fmt,mdss-dsi-on-command =
+			"DTYPE_GEN_LWRITE", <0>, <2>, [B0 04],/* Manufacturer_Command */
+			"DTYPE_DCS_LWRITE", <0>, <2>, [3A 70],/* set_pixel_format */
+			"DTYPE_DCS_WRITE1", <0>, <2>, [51 FF],/* display_brightness */
+			"DTYPE_DCS_WRITE1", <0>, <2>, [53 2C],/* ctrl_display */
+			"DTYPE_DCS_WRITE1", <0>, <2>, [55 02],/* content adaptive_brightness_control */
+			"DTYPE_GEN_LWRITE", <0>, <26>, [D3 1B 33 BB BB B3 33 33 33 00 01 00 A0 E8 A0 0D 46
+					46 33 3B 37 72 57 3D BF 33],/* internal_power_setting 1*/
+			"DTYPE_GEN_LWRITE", <0>, <33>, [CA 01 01 97 75 97 A8 BB A8 08 2F 05 78 0A 4A 37 A0
+					01 A0 08 08 20 10 08 08 CB F2 10 10 3F 3F 3F 3F],/* CE setting */
+			"DTYPE_GEN_LWRITE", <0>, <07>, [B9 07 7A 45 20 13 4B],/* CABC still mode */
+			"DTYPE_GEN_LWRITE", <0>, <07>, [BA 07 7C 57 20 13 99],/* CABC movie mode */
+			"DTYPE_GEN_LWRITE", <0>, <24>, [CE 75 00 01 02 03 45 C5 DC E3 ED F4 F7 F9 FB FD FE
+					FF 01 5F 04 04 44 20],/* PWM freq=40kHz */
+			"DTYPE_DCS_WRITE", <10>, <2>, [29 00],/* LCD Display on */
+			"DTYPE_DCS_WRITE", <128>, <2>, [11 00];/* exit sleep */
+		htc-fmt,mdss-dsi-off-command =
+			"DTYPE_DCS_WRITE" , <0>, <2>, [28 00],/* display_off */
+			"DTYPE_GEN_LWRITE", <51>, <26>, [D3 13 33 BB B3 B3 33 33 33 00 01 00 A0 E8 A0 0D 46 46 33
+					3B 37 72 57 3D BF 33],/* internal_power_setting 2*/
+			"DTYPE_DCS_WRITE" , <81>, <2>, [10 00];/* Sleep in */
+		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
+		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
+		qcom,mdss-dsi-h-sync-pulse = <0>;
+		qcom,mdss-dsi-traffic-mode = "non_burst_sync_event";
+		qcom,mdss-dsi-bllp-eof-power-mode;
+		qcom,mdss-dsi-lane-map = "lane_map_0123";
+		qcom,mdss-dsi-bllp-power-mode;
+		qcom,mdss-dsi-lane-0-state;
+		qcom,mdss-dsi-lane-1-state;
+		qcom,mdss-dsi-lane-2-state;
+		qcom,mdss-dsi-lane-3-state;
+		qcom,mdss-dsi-panel-timings = [E6 38 26 00 68 6C 2A 3C 2C 03 04 00];
+		qcom,mdss-dsi-t-clk-post = <0x02>;
+		qcom,mdss-dsi-t-clk-pre = <0x2B>;
+		qcom,mdss-dsi-bl-min-level = <1>;
+		qcom,mdss-dsi-bl-max-level = <255>;
+		qcom,mdss-dsi-dma-trigger = "trigger_sw";
+		qcom,mdss-dsi-mdp-trigger = "none";
+		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_i2c";
+		htc-fmt,dimming-on-cmds = "DTYPE_DCS_LWRITE", <0>, <2>, [53 2C];
+		qcom,mdss-dsi-default-command-state = "dsi_hs_mode";
+		qcom,mdss-pan-physical-width-dimension = <62>;
+		qcom,mdss-pan-physical-height-dimension = <110>;
+		qcom,mdss-shrink-pwm = <6 88 255>;
+		qcom,mdss-dsi-lp11-init;
+		qcom,mdss-dsi-force-clk-lane-hs;
+		htc,mdss-camera-blk = <189>;
+		htc,panel-id=<1>;
+	};
+};

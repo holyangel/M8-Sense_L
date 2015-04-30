@@ -1,0 +1,60 @@
+config HTC_RADIO_SMEM
+	bool "RADIO SMEM"
+	default N
+	---help---
+	Enable to move necessary non-secure data to shared memory
+
+
+config HTC_FEATURES_RIL_PCN0001_REBOOT_WITH_ERASE_EFS
+       bool "Reboot with ERASE_EFS reason when SMSM_ERASE_EFS raised"
+       default y
+       help
+         When modem met fatal,
+         It will enable bit RESTART_MODE_ERASE_EFS.
+         Then when device reboot, it will clean up EFS.
+
+config HTC_DEBUG_RIL_PCN0002_DUMP_STACK
+       bool "Dump call stack when modem crash"
+       help
+         Say Y here if you want dump call stack when modem crash
+
+config HTC_FEATURES_RIL_PCN0003_HTC_MONITOR
+	tristate "HTC_FEATURES_RIL_PCN0003_HTC_MONITOR"
+	default n
+	---help---
+	  Come up with a way to add information of data usage in attribute file
+	  for identifying the process that requested for data transmission.
+
+
+config HTC_FEATURES_RIL_PCN0004_HTC_GARBAGE_FILTER
+	tristate "HTC_FEATURES_RIL_PCN0004_HTC_GARBAGE_FILTER"
+	default n
+	depends on MSM_SMD
+	---help---
+	  Garbage Filter of TCP
+
+config HTC_DEBUG_RIL_PCN0005_HTC_DUMP_SMSM_LOG
+	tristate "HTC_DEBUG_RIL_PCN0005_HTC_DUMP_SMSM_LOG"
+	default n
+	depends on MSM_SMD
+	---help---
+	  Dump SMSM log message
+
+config HTC_DEBUG_RIL_PCN0006_HTC_DUMP_BAM_DMUX_LOG
+	tristate "HTC_DEBUG_RIL_PCN0006_HTC_DUMP_BAM_DMUX_LOG"
+	default n
+	depends on MSM_BAM_DMUX
+	---help---
+	  Dump BAM DMUX log message
+
+config HTC_FEATURES_RIL_PCN0007_FINAL_EFS_SYNC
+	tristate "HTC_DEBUG_RIL_PCN0007_FINAL_EFS_SYNC"
+	default y
+	---help---
+	  Trigger modem EFS sync when device reboot
+
+config HTC_FEATURES_RIL_PCN0008_ENLARGE_RADIO_BUFFER
+	tristate "HTC_FEATURES_RIL_PCN0008_ENLARGE_RADIO_BUFFER"
+	default n
+	---help---
+	  enlarge radio log buffer.
