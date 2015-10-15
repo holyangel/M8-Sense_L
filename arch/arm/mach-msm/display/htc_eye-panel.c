@@ -9,6 +9,10 @@
 #include <mach/debug_display.h>
 #include "../../../../drivers/video/msm/mdss/mdss_dsi.h"
 
+#ifdef CONFIG_HTC_PNPMGR
+extern void set_screen_status(bool onoff);
+#endif
+
 struct dsi_power_data {
 	uint32_t sysrev;         
 	struct regulator *vddio; 
@@ -422,6 +426,9 @@ static int htc_eye_panel_power_on(struct mdss_panel_data *pdata, int enable)
 	}
 	PR_DISP_INFO("%s: en=%d done\n", __func__, enable);
 
+#ifdef CONFIG_HTC_PNPMGR
+	set_screen_status(enable);
+#endif
 	return 0;
 }
 

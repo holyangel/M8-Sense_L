@@ -104,6 +104,10 @@ void set_msm_watchdog_en_footprint(int enable)
 	mb();
 }
 
+/* UTC time depends on linux timekeeping.
+ * timekeeping will be suspended during suspend flow.
+ * We need to handle this footprint separatedly.
+ */
 void set_msm_watchdog_pet_time_utc(void)
 {
 	struct timespec ts;
@@ -122,6 +126,10 @@ void set_msm_watchdog_pet_footprint(unsigned int sleep_clk_base)
 
 	do_div(timestamp_ms, NSEC_PER_MSEC);
 
+	/* If watchdog disable is deferred to actual suspend call,
+	 * there will WARN message while calling getnstimeofday
+	 * because timekeeping is suspended during syscore suspend flow.
+	 */
 	if (likely(!timekeeping_suspended)) {
 		set_msm_watchdog_pet_time_utc();
 	}
@@ -188,6 +196,14 @@ void init_cpu_debug_counter_for_cold_boot(void)
 	mb();
 }
 
+/* Status Check:
+ *          from_idle, notify_rpm, core
+ *       PC:    false,       true,    0
+ *  IDLE PC:     true,       true,  0-3
+ *      SPC:    false,      false,  0-3
+ * IDLE SPC:     true,      false,  0-3
+ *  HOTPLUG:    false,       true,  1-3
+ */
 void init_cpu_foot_print(unsigned cpu, bool from_idle, bool notify_rpm)
 {
 	unsigned state = CPU_FOOT_PRINT_MAGIC_HOTPLUG;

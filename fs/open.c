@@ -865,7 +865,7 @@ static int pre_allocate(struct file *f)
 	if (!f->f_op->fallocate || !(f->f_mode & FMODE_WRITE))
 		return 0;
 
-	if (f->f_path.dentry->d_parent &&
+	if (f->f_path.dentry && f->f_path.dentry->d_parent &&
 			!strcmp(f->f_path.dentry->d_parent->d_name.name, "htclog"))
 		prealloc_size = get_logfile_prealloc_size();
 

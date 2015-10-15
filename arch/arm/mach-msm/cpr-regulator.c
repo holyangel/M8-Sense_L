@@ -216,7 +216,7 @@ struct cpr_regulator {
 	int		*quot_adjust;
 	bool		is_cpr_suspended;
 
-#ifdef CONFIG_ARCH_DUMMY
+#ifdef CONFIG_ARCH_MSM8226
 	
 	u32		htc_pvs_corner_v[CPR_FUSE_CORNER_MAX];
 #endif
@@ -854,7 +854,7 @@ static int cpr_regulator_disable(struct regulator_dev *rdev)
 	return rc;
 }
 
-#ifdef CONFIG_ARCH_DUMMY
+#ifdef CONFIG_ARCH_MSM8226
 bool htc_pvs_adjust = false;
 u32 htc_pvs_adjust_seconds = 0;
 #endif
@@ -874,7 +874,7 @@ static int cpr_regulator_set_voltage(struct regulator_dev *rdev,
 		cpr_ctl_disable(cpr_vreg);
 		new_volt = cpr_vreg->last_volt[corner];
 	} else {
-#ifdef CONFIG_ARCH_DUMMY
+#ifdef CONFIG_ARCH_MSM8226
 		if (!htc_pvs_adjust) {
 			new_volt = cpr_vreg->pvs_corner_v[fuse_corner];
 		} else {
@@ -1993,7 +1993,7 @@ static int __devinit cpr_voltage_plan_init(struct platform_device *pdev,
 	return 0;
 }
 
-#if CONFIG_ARCH_DUMMY
+#if CONFIG_ARCH_MSM8226
 static int __devinit htc_init_corner(struct platform_device *pdev,
 					struct cpr_regulator *cpr_vreg)
 {
@@ -2138,7 +2138,7 @@ static int __devinit cpr_regulator_probe(struct platform_device *pdev)
 		goto err_out;
 	}
 
-#if CONFIG_ARCH_DUMMY
+#if CONFIG_ARCH_MSM8226
 	rc = htc_init_corner(pdev, cpr_vreg);
 	if (rc) {
 		pr_err("Iniyialize HTC modifications failed: rc=%d\n", rc);

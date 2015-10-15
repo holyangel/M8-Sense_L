@@ -12,12 +12,14 @@
 #define PANEL_ID_KIWI_SHARP_HX      0
 #define PANEL_ID_A5_JDI_NT35521_C3      1
 
+/* HTC: dsi_power_data overwrite the role of dsi_drv_cm_data
+   in mdss_dsi_ctrl_pdata structure */
 struct dsi_power_data {
-	uint32_t sysrev;         
-	struct regulator *vddio; 
-	struct regulator *vdda;  
-	struct regulator *vdd;  
-	struct regulator *vddpll; 
+	uint32_t sysrev;         /* system revision info */
+	struct regulator *vddio; /* 1.8v */
+	struct regulator *vdda;  /* 1.2v */
+	struct regulator *vdd;  /* 3v */
+	struct regulator *vddpll; /* 1.8v */
 	int lcmio;
 	int lcmp5v;
 	int lcmn5v;
@@ -91,7 +93,7 @@ static int tps_65132_add_i2c(struct i2c_client *client)
 	struct i2c_adapter *adapter = client->adapter;
 	int idx;
 
-	
+	/* "Hotplug" the MHL transmitter device onto the 2nd I2C bus  for BB-xM or 4th for pandaboard*/
 	i2c_bus_adapter = adapter;
 	if (i2c_bus_adapter == NULL) {
 		PR_DISP_ERR("%s() failed to get i2c adapter\n", __func__);
@@ -255,7 +257,9 @@ static int htc_mem_regulator_init(struct platform_device *pdev)
 
 static int htc_mem_regulator_deinit(struct platform_device *pdev)
 {
-	
+	/* devm_regulator() will automatically free regulators
+	   while dev detach. */
+	/* nothing */
 	return 0;
 }
 
@@ -321,7 +325,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
 	struct dsi_power_data *pwrdata = NULL;
-	u8 avdd_level = 0x0F; 
+	u8 avdd_level = 0x0F; //set to +-5.5V
 
 	PR_DISP_INFO("%s: en=%d\n", __func__, enable);
 	if (pdata == NULL) {
@@ -368,7 +372,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 				return ret;
 			}
 
-			
+			/*enable 1v8*/
 			ret = regulator_enable(pwrdata->vddio);
 			if (ret) {
 				PR_DISP_ERR("%s: Failed to enable regulator.\n",
@@ -377,7 +381,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 			}
 
 			usleep_range(1000,2000);
-			
+			/*enable 3v*/
 			ret = regulator_enable(pwrdata->vdd);
 			if (ret) {
 				PR_DISP_ERR("%s: Failed to enable regulator.\n",
@@ -388,7 +392,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 
 			usleep_range(12000,13000);
 
-			
+			/*enable 1v8*/
 			ret = regulator_enable(pwrdata->vddpll);
 			if (ret) {
 				PR_DISP_ERR("%s: Failed to enable regulator.\n",
@@ -396,7 +400,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 				return ret;
 			}
 
-			
+			/*ENABLE 1V2*/
 			ret = regulator_enable(pwrdata->vdda);
 			if (ret) {
 				PR_DISP_ERR("%s: Failed to enable regulator.\n",
@@ -427,7 +431,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 				return ret;
 			}
 
-			
+			/*enable 1v8*/
 			ret = regulator_enable(pwrdata->vddio);
 			if (ret) {
 				PR_DISP_ERR("%s: Failed to enable regulator.\n",
@@ -445,7 +449,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 
 			usleep_range(12000,13000);
 
-			
+			/*enable 1v8*/
 			ret = regulator_enable(pwrdata->vddpll);
 			if (ret) {
 				PR_DISP_ERR("%s: Failed to enable regulator.\n",
@@ -453,7 +457,7 @@ static int htc_mem_panel_power_on(struct mdss_panel_data *pdata, int enable)
 				return ret;
 			}
 
-			
+			/*ENABLE 1V2*/
 			ret = regulator_enable(pwrdata->vdda);
 			if (ret) {
 				PR_DISP_ERR("%s: Failed to enable regulator.\n",

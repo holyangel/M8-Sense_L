@@ -209,7 +209,7 @@ static int32_t msm_cci_data_queue(struct cci_device *cci_dev,
 		pr_err("%s failed line %d\n", __func__, __LINE__);
 		return -EINVAL;
 	}
-	
+
 	reg_addr = i2c_cmd->reg_addr;
 	while (cmd_size) {
 		CDBG("%s cmd_size %d addr 0x%x data 0x%x\n", __func__,
@@ -229,21 +229,21 @@ static int32_t msm_cci_data_queue(struct cci_device *cci_dev,
 		}
 		
 		do {
-		if (i2c_msg->data_type == MSM_CAMERA_I2C_BYTE_DATA) {
-			data[i++] = i2c_cmd->reg_data;
-			reg_addr++;
-		} else {
-			if ((i + 1) <= 10) {
-				data[i++] = (i2c_cmd->reg_data &
-					0xFF00) >> 8; 
-				data[i++] = i2c_cmd->reg_data &
-					0x00FF; 
-				reg_addr += 2;
-			} else
-				break;
-		}
-		i2c_cmd++;
-		--cmd_size;
+			if (i2c_msg->data_type == MSM_CAMERA_I2C_BYTE_DATA) {
+				data[i++] = i2c_cmd->reg_data;
+				reg_addr++;
+			} else {
+				if ((i + 1) <= 10) {
+					data[i++] = (i2c_cmd->reg_data &
+						0xFF00) >> 8; 
+					data[i++] = i2c_cmd->reg_data &
+						0x00FF; 
+					reg_addr += 2;
+				} else
+					break;
+			}
+			i2c_cmd++;
+			--cmd_size;
 		} while ((c_ctrl->cmd == MSM_CCI_I2C_WRITE_SEQ) &&
 				(cmd_size > 0) && (i <= 10));
 

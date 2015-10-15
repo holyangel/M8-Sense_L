@@ -1862,8 +1862,11 @@ static long kgsl_ioctl_rb_issueibcmds(struct kgsl_device_private *dev_priv,
 		cmdbatch, &param->timestamp);
 
 free_cmdbatch:
-	if (result && result != -EPROTO)
+	if (result && result != -EPROTO) {
+		kgsl_mutex_lock(&device->mutex, &device->mutex_owner);
 		kgsl_cmdbatch_destroy(cmdbatch);
+		kgsl_mutex_unlock(&device->mutex, &device->mutex_owner);
+	}
 
 done:
 	kgsl_context_put(context);
@@ -1910,8 +1913,11 @@ static long kgsl_ioctl_submit_commands(struct kgsl_device_private *dev_priv,
 		cmdbatch, &param->timestamp);
 
 free_cmdbatch:
-	if (result && result != -EPROTO)
+	if (result && result != -EPROTO) {
+		kgsl_mutex_lock(&device->mutex, &device->mutex_owner);
 		kgsl_cmdbatch_destroy(cmdbatch);
+		kgsl_mutex_unlock(&device->mutex, &device->mutex_owner);
+	}
 
 done:
 	kgsl_context_put(context);

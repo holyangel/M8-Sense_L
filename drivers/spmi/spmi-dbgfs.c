@@ -1238,21 +1238,21 @@ int htc_vreg_dump(int vreg_id, struct seq_file *m, char *vreg_buffer, int curr_l
 
         return curr_len;
 }
-#if defined(CONFIG_MACH_EYE_UL)
+#if defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_EYE
-#elif defined(CONFIG_MACH_EYE_WL)
+#elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_EYE
-#elif defined(CONFIG_MACH_EYE_WHL)
+#elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_EYE
-#elif defined(CONFIG_MACH_MEC_TL)
+#elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_MEC
-#elif defined(CONFIG_MACH_MEC_WHL)
+#elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_MEC
-#elif defined(CONFIG_MACH_MEC_UL)
+#elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_MEC
-#elif defined(CONFIG_MACH_MEC_DUG)
+#elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_MEC
-#elif defined(CONFIG_MACH_MEC_DWG)
+#elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_MEC
 #elif defined(CONFIG_MACH_DUMMY)
 #define PN547_I2C_POWEROFF_SEQUENCE_FOR_B2

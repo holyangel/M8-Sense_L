@@ -287,7 +287,6 @@ config ARCH_MSM8974
 	select ARCH_WANT_KMAP_ATOMIC_FLUSH
 	select KRAIT_REGULATOR
 	select ENABLE_VMALLOC_SAVINGS
-	select HAS_MACH_MEMUTILS
 
 config ARCH_APQ8084
 	bool "APQ8084"
@@ -487,6 +486,49 @@ config ARCH_MSM8610
 	select MSM_RPM_LOG
 	select MSM_IOMMU_SYNC
 	select MSM_RPM_STATS_LOG
+
+config ARCH_MSM8226
+	bool "MSM8226"
+	select ARM_GIC
+	select GIC_SECURE
+	select ARCH_MSM_CORTEXMP
+	select CPU_V7
+	select MSM_SCM
+	select MAY_HAVE_SPARSE_IRQ
+	select SPARSE_IRQ
+	select MULTI_IRQ_HANDLER
+	select ARM_TICKET_LOCKS
+	select GPIO_MSM_V3
+	select MSM_GPIOMUX
+	select MSM_NATIVE_RESTART
+	select MSM_RESTART_V2
+	select MSM_QDSP6_APRV2
+	select MSM_QDSP6V2_CODECS
+	select MSM_AUDIO_QDSP6V2 if SND_SOC
+	select QMI_ENCDEC
+	select MSM_RPM_SMD
+	select MSM_SPM_V2
+	select MSM_L2_SPM
+	select MSM_PM if PM
+	select MEMORY_HOLE_CARVEOUT
+	select MSM_BUS_SCALING
+	select MSM_CORTEX_A7
+	select CPU_FREQ_MSM
+	select CPU_FREQ
+	select PM_DEVFREQ
+	select MSM_DEVFREQ_CPUBW
+	select MSM_PIL
+	select MSM_RUN_QUEUE_STATS
+	select ARM_HAS_SG_CHAIN
+	select REGULATOR
+	select MSM_RPM_REGULATOR_SMD
+	select MSM_SPM_REGULATOR
+	select MSM_JTAG_MM if CORESIGHT_ETM
+	select MSM_CPR_REGULATOR
+	select MSM_RPM_LOG
+	select MSM_RPM_STATS_LOG
+	select ARCH_WANT_KMAP_ATOMIC_FLUSH
+	select ENABLE_VMALLOC_SAVINGS
 
 config ARCH_MSMSAMARIUM
 	bool "MSMSAMARIUM"
@@ -1509,6 +1551,13 @@ config HTC_INSERT_NOTIFY_DELAY
 	help
 	  delay headset insert notify
 
+config HTC_HEADSET_DET_DEBOUNCE
+	tristate "HTC headset detect-pin debounce"
+	depends on HTC_HEADSET_INT_REDETECT
+	default n
+	help
+	  Support headset detect-pin debounce
+
 config TROUT_BATTCHG
 	depends on MACH_TROUT && POWER_SUPPLY
 	default y
@@ -1523,6 +1572,11 @@ config HTC_BATT_8960
         depends on HTC_BATT_CORE
         default n
         bool "HTC battery driver for 8960"
+
+config HTC_BATT_SWOLLEN_WA
+        depends on HTC_BATT_8960
+        default n
+        bool "HTC battery swollen workaround"
 
 config DUTY_CYCLE_LIMIT
 	bool "Duty cycle limit charging support"
@@ -3024,13 +3078,6 @@ config MSM_CPU_PWRCTL
 	  stand alone power collapse operation. Selecting this option
 	  ensures that they are always off.
 
-config FORCE_FAST_CHARGE
-	bool "Increase input current limit to 1100mA when charging via USB"
-	default y
-	help
-	  A simple sysfs interface to increase input current limit to
-	  1100mA when charging via USB.
-
 config MSM_UARTDM_Core_v14
 	bool "Use MSM BLSP based HSUART Core v1.4"
 	depends on SERIAL_MSM_HS
@@ -3105,6 +3152,24 @@ config HTC_PANEL_PWR_REG
         bool "Register DSI Panel Power"
 		default y if ARCH_MSM8226
 
+config MACH_BAGOSS
+        depends on ARCH_MSM8974
+        bool "MSM8974 BAGOSS"
+        help
+          Support for HTC MSM8974 BAGOSS
+
+config MACH_GLU_U
+        depends on ARCH_MSM8974
+        bool "MSM8974 GLU_U"
+        help
+          Support for HTC MSM8974 GLU_U
+
+config MACH_GLU_WLJ
+        depends on ARCH_MSM8974
+        bool "MSM8974 GLU_WLJ"
+        help
+          Support for HTC MSM8974 GLU_WLJ
+
 config MACH_M8
         depends on ARCH_MSM8974
         bool "MSM8974 M8"
@@ -3116,6 +3181,12 @@ config PROJECT_NAME
         default ""
         help
           Support for Project Name
+
+config MACH_J1
+        depends on ARCH_MSM8226
+        bool "MSM8226 J1"
+        help
+          Support for HTC MSM8226 J1
 
 endif
 
@@ -3135,9 +3206,3 @@ config HTC_MONITOR_SUBSYS_SLEEP_TIME
     bool "Monitor the sleep time of sub-system"
     help
         Support to monitor the sleep time of sub-system
-
-config HAS_MACH_MEMUTILS
-	default y
-	bool "Motorola MSM memcpy enhancements"
-	help
-	Faster memcpy performance for Krait

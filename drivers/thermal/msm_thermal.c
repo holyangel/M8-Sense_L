@@ -1517,7 +1517,6 @@ static __ref int do_freq_mitigation(void *data)
 			;
 		INIT_COMPLETION(freq_mitigation_complete);
 
-		get_online_cpus();
 		for_each_possible_cpu(cpu) {
 			max_freq_req = (cpus[cpu].max_freq) ?
 					msm_thermal_info.freq_limit :
@@ -1545,7 +1544,6 @@ reset_threshold:
 				cpus[cpu].freq_thresh_clear = false;
 			}
 		}
-		put_online_cpus();
 	}
 	return ret;
 }
@@ -3190,7 +3188,7 @@ static int __devinit msm_thermal_dev_probe(struct platform_device *pdev)
 	key = "qcom,freq-control-mask";
 	ret = of_property_read_u32(node, key, &data.bootup_freq_control_mask);
 
-#if defined(CONFIG_MACH_EYE_UL)
+#if defined(CONFIG_MACH_DUMMY)
 	if(get_kernel_flag() & KERNEL_FLAG_KEEP_CHARG_ON) {
 		data.poll_ms = 100;
 		data.bootup_freq_step = 4;

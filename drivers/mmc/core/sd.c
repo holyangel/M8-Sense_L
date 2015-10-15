@@ -1067,7 +1067,7 @@ static int mmc_sd_suspend(struct mmc_host *host)
 
 static int mmc_sd_resume(struct mmc_host *host)
 {
-	int err = 0;
+	int err;
 #ifdef CONFIG_MMC_PARANOID_SD_INIT
 	int retries;
 	int delayTime;

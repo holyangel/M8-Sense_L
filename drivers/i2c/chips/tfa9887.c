@@ -31,16 +31,13 @@
 #include <linux/debugfs.h>
 #include <linux/gpio.h>
 #include <linux/module.h>
-//#include <linux/mfd/pm8xxx/pm8921.h>
 #include <linux/of_gpio.h>
 #include <mach/htc_acoustic_alsa.h>
 
-//htc audio ++
 #undef pr_info
 #undef pr_err
 #define pr_info(fmt, ...) pr_aud_info(fmt, ##__VA_ARGS__)
 #define pr_err(fmt, ...) pr_aud_err(fmt, ##__VA_ARGS__)
-//htc audio --
 
 #define TPA9887_IOCTL_MAGIC 'a'
 #define TPA9887_WRITE_CONFIG	_IOW(TPA9887_IOCTL_MAGIC, 0x01, unsigned int)
@@ -124,7 +121,7 @@ static ssize_t codec_debug_write(struct file *filp,
 	lbuf[cnt] = '\0';
 
 	if (!strcmp(access_str, "poke")) {
-		/* write */
+		
 		rc = get_parameters(lbuf, param, 2);
 		if ((param[0] <= 0xFF) && (param[1] <= 0xFF) &&
 			(rc == 0)) {
@@ -134,7 +131,7 @@ static ssize_t codec_debug_write(struct file *filp,
 		} else
 			rc = -EINVAL;
 	} else if (!strcmp(access_str, "peek")) {
-		/* read */
+		
 		rc = get_parameters(lbuf, param, 1);
 		if ((param[0] <= 0xFF) && (rc == 0)) {
 			reg_idx[0] = param[0];
@@ -160,7 +157,7 @@ static const struct file_operations codec_debug_ops = {
 #ifdef CONFIG_AMP_TFA9887L
 unsigned char cf_dsp_bypass[7][3] = {
     {0x08, 0x3C, 0x4E},
-    {0x04, 0x88, 0x53},//for Rchannel
+    {0x04, 0x88, 0x53},
     {0x05, 0x13, 0xAB},
     {0x49, 0x0E, 0x80},
     {0x0A, 0x07, 0xC3},
@@ -264,8 +261,8 @@ static int tfa9887_release(struct inode *inode, struct file *file)
 int set_tfa9887_spkamp(int en, int dsp_mode)
 {
 	int i =0;
-        //unsigned char write_reg[1] = {0x03};
-        //unsigned char write_data[2] = {0, 0};
+        
+        
         unsigned char mute_reg[1] = {0x06};
 	unsigned char mute_data[3] = {0, 0, 0};
         unsigned char power_reg[1] = {0x09};
@@ -275,26 +272,26 @@ int set_tfa9887_spkamp(int en, int dsp_mode)
 	mutex_lock(&spk_amp_lock);
 	if (en && !last_spkamp_state) {
 		last_spkamp_state = 1;
-		/* NXP CF DSP Bypass mode */
+		
 		if (dsp_enabled == 0) {
 			for (i=0; i <7 ; i++)
 				tfa9887_i2c_write(cf_dsp_bypass[i], 3);
 		} else {
-			//tfa9887_i2c_write(write_reg, 1);
-			//tfa9887_i2c_read(write_data, 2);
+			
+			
 			tfa9887_i2c_write(power_reg, 1);
 			tfa9887_i2c_read(power_data + 1, 2);
 			tfa9887_i2c_write(mute_reg, 1);
 			tfa9887_i2c_read(mute_data + 1, 2);
 			mute_data[0] = 0x6;
-			mute_data[2] &= 0xdf;  //bit 5 dn = un=mute
+			mute_data[2] &= 0xdf;  
 			power_data[0] = 0x9;
-			power_data[2] &= 0xfe; //bit 0 dn = power up
-			//Tfa9887_PowerDown(0)
+			power_data[2] &= 0xfe; 
+			
 			tfa9887_i2c_write(power_data, 3);
-			//Tfa9887_SetMute(Tfa9887_Mute_off)
+			
 			tfa9887_i2c_write(mute_data, 3);
-			power_data[2] |= 0x8;  //bit 3 Up = AMP on
+			power_data[2] |= 0x8;  
 			tfa9887_i2c_write(power_data, 3);
 		}
 	} else if (!en && last_spkamp_state) {
@@ -302,24 +299,24 @@ int set_tfa9887_spkamp(int en, int dsp_mode)
 		if (dsp_enabled == 0) {
 			tfa9887_i2c_write(amp_off[0], 3);
 		} else {
-			//tfa9887_i2c_write(write_reg, 1);
-			//tfa9887_i2c_read(write_data, 2);
+			
+			
 			tfa9887_i2c_write(power_reg, 1);
 			tfa9887_i2c_read(power_data + 1, 2);
 			tfa9887_i2c_write(mute_reg, 1);
 			tfa9887_i2c_read(mute_data + 1, 2);
 			mute_data[0] = 0x6;
-			mute_data[2] |= 0x20; //bit 5 up = mute
-			//Tfa9887_SetMute(Tfa9887_Mute_Amplifier)
+			mute_data[2] |= 0x20; 
+			
 			tfa9887_i2c_write(mute_data, 3);
 			tfa9887_i2c_write(power_reg, 1);
 			tfa9887_i2c_read(power_data + 1, 2);
 			power_data[0] = 0x9;
-			power_data[2] &= 0xf7;  //bit 3 down = AMP off
+			power_data[2] &= 0xf7;  
 			tfa9887_i2c_write(power_data, 3);
-			//msleep(10);
-			//Tfa9887_PowerDown(1)
-			power_data[2] |= 0x1;  //bit 0 up = power down
+			
+			
+			power_data[2] |= 0x1;  
 			tfa9887_i2c_write(power_data, 3);
 		}
 	}
@@ -337,6 +334,7 @@ static long tfa9887_ioctl(struct file *file, unsigned int cmd,
 	char *addr;
 	void __user *argp = (void __user *)arg;
 	struct amp_ctrl ampctrl;
+	char *buf;
 
 	switch (cmd) {
 	case TPA9887_WRITE_CONFIG:
@@ -350,7 +348,19 @@ static long tfa9887_ioctl(struct file *file, unsigned int cmd,
 		len = reg_value[0];
 		addr = (char *)reg_value[1];
 
-		tfa9887_i2c_write(addr+1, len -1);
+		buf = kmalloc(len, GFP_KERNEL);
+		if (!buf) {
+			pr_err("%s len %u NO mem\n", __func__, len);
+			return -ENOMEM;
+		}
+		if (copy_from_user(buf, addr, len)) {
+			kfree(buf);
+			pr_err("%s addr %x error\n", __func__, (unsigned int)addr);
+			return -EFAULT;
+		}
+
+		tfa9887_i2c_write(buf+1, len -1);
+		kfree(buf);
 
 		break;
 	case TPA9887_READ_CONFIG:
@@ -363,7 +373,20 @@ static long tfa9887_ioctl(struct file *file, unsigned int cmd,
 
 		len = reg_value[0];
 		addr = (char *)reg_value[1];
-		tfa9887_i2c_read(addr, len);
+
+		buf = kmalloc(len, GFP_KERNEL);
+		if (!buf) {
+			pr_err("%s len %u NO mem\n", __func__, len);
+			return -ENOMEM;
+		}
+
+		tfa9887_i2c_read(buf, len);
+		if (copy_to_user(addr, buf, len)) {
+			kfree(buf);
+			pr_err("%s addr %x error\n", __func__, (unsigned int)addr);
+			return -EFAULT;
+		}
+		kfree(buf);
 
 		rc = copy_to_user(argp, reg_value, sizeof(reg_value));
 		if (rc < 0) {
@@ -382,7 +405,21 @@ static long tfa9887_ioctl(struct file *file, unsigned int cmd,
 
 		len = reg_value[0];
 		addr = (char *)reg_value[1];
-		tfa9887_l_write(addr+1, len -1);
+
+		buf = kmalloc(len, GFP_KERNEL);
+		if (!buf) {
+			pr_err("%s len %u NO mem\n", __func__, len);
+			return -ENOMEM;
+		}
+		if (copy_from_user(buf, addr, len)) {
+			kfree(buf);
+			pr_err("%s addr %x error\n", __func__, (unsigned int)addr);
+			return -EFAULT;
+		}
+
+		tfa9887_l_write(buf+1, len -1);
+		kfree(buf);
+
 		break;
 	case TPA9887_READ_L_CONFIG:
 		pr_debug("%s: TPA9887_READ_CONFIG_L\n", __func__);
@@ -394,7 +431,20 @@ static long tfa9887_ioctl(struct file *file, unsigned int cmd,
 
 		len = reg_value[0];
 		addr = (char *)reg_value[1];
-		tfa9887_l_read(addr, len);
+
+		buf = kmalloc(len, GFP_KERNEL);
+		if (!buf) {
+			pr_err("%s len %u NO mem\n", __func__, len);
+			return -ENOMEM;
+		}
+
+		tfa9887_l_read(buf, len);
+		if (copy_to_user(addr, buf, len)) {
+			kfree(buf);
+			pr_err("%s addr %x NO mem\n", __func__, (unsigned int)addr);
+			return -EFAULT;
+		}
+		kfree(buf);
 
 		rc = copy_to_user(argp, reg_value, sizeof(reg_value));
 		if (rc < 0) {
@@ -422,7 +472,7 @@ static long tfa9887_ioctl(struct file *file, unsigned int cmd,
 		}
 
 		len = reg_value[0];
-		//dsp_enabled = reg_value[1];
+		
 		pr_debug("TPA9887_KLOCK1 %d\n", reg_value[1]);
 		if (reg_value[1])
 		   mutex_lock(&spk_amp_lock);

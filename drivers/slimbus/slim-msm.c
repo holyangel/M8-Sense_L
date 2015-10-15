@@ -11,6 +11,7 @@
  */
 #include <linux/pm_runtime.h>
 #include <linux/dma-mapping.h>
+#include <linux/delay.h>
 #include <linux/slimbus/slimbus.h>
 #include <mach/sps.h>
 #include "slim-msm.h"
@@ -380,9 +381,9 @@ static int msm_slim_post_tx_msgq(struct msm_slim_ctrl *dev, u8 *buf, int len)
 	struct msm_slim_endp *endpoint = &dev->tx_msgq;
 	struct sps_mem_buffer *mem = &endpoint->buf;
 	struct sps_pipe *pipe = endpoint->sps;
-	int ix = (buf - (u8 *)mem->base) / SLIM_MSGQ_BUF_LEN;
+	int ix = (buf - (u8 *)mem->base);
 
-	phys_addr_t phys_addr = mem->phys_base + (SLIM_MSGQ_BUF_LEN * ix);
+	phys_addr_t phys_addr = mem->phys_base + ix;
 
 	for (ret = 0; ret < ((len + 3) >> 2); ret++)
 		pr_debug("BAM TX buf[%d]:0x%x", ret, ((u32 *)buf)[ret]);
@@ -395,29 +396,103 @@ static int msm_slim_post_tx_msgq(struct msm_slim_ctrl *dev, u8 *buf, int len)
 	return ret;
 }
 
-static u32 *msm_slim_tx_msgq_return(struct msm_slim_ctrl *dev)
+void msm_slim_tx_msg_return(struct msm_slim_ctrl *dev)
 {
 	struct msm_slim_endp *endpoint = &dev->tx_msgq;
 	struct sps_mem_buffer *mem = &endpoint->buf;
 	struct sps_pipe *pipe = endpoint->sps;
 	struct sps_iovec iovec;
-	int ret;
-
-	
-	if (dev->tx_idx == -1) {
-		dev->tx_idx = 0;
-		return mem->base;
+	int idx, ret = 0;
+	if (dev->use_tx_msgqs != MSM_MSGQ_ENABLED) {
+		
+		if (dev->wr_comp[0]) {
+			struct completion *comp = dev->wr_comp[0];
+			dev->wr_comp[0] = NULL;
+			complete(comp);
+		}
+		return;
 	}
-	ret = sps_get_iovec(pipe, &iovec);
-	if (ret || iovec.addr == 0) {
-		dev_err(dev->dev, "sps_get_iovec() failed 0x%x\n", ret);
+	while (!ret) {
+		ret = sps_get_iovec(pipe, &iovec);
+		if (ret || iovec.addr == 0) {
+			if (ret)
+				pr_err("SLIM TX get IOVEC failed:%d", ret);
+			return;
+		}
+		idx = (int) ((iovec.addr - mem->phys_base) / SLIM_MSGQ_BUF_LEN);
+		if (idx < MSM_TX_BUFS && dev->wr_comp[idx]) {
+			struct completion *comp = dev->wr_comp[idx];
+			dev->wr_comp[idx] = NULL;
+			complete(comp);
+		}
+		
+		if (idx != dev->tx_head)
+			pr_err("SLIM OUT OF ORDER TX:idx:%d, head:%d", idx,
+								dev->tx_head);
+		while (idx == dev->tx_head) {
+			dev->tx_head = (dev->tx_head + 1) % MSM_TX_BUFS;
+			idx++;
+			if (dev->tx_head == dev->tx_tail ||
+					dev->wr_comp[idx] != NULL)
+				break;
+		}
+	}
+}
+
+static u32 *msm_slim_modify_tx_buf(struct msm_slim_ctrl *dev,
+					struct completion *comp)
+{
+	struct msm_slim_endp *endpoint = &dev->tx_msgq;
+	struct sps_mem_buffer *mem = &endpoint->buf;
+	u32 *retbuf = NULL;
+	if ((dev->tx_tail + 1) % MSM_TX_BUFS == dev->tx_head)
+		return NULL;
+
+	retbuf = (u32 *)((u8 *)mem->base +
+				(dev->tx_tail * SLIM_MSGQ_BUF_LEN));
+	dev->wr_comp[dev->tx_tail] = comp;
+	dev->tx_tail = (dev->tx_tail + 1) % MSM_TX_BUFS;
+	return retbuf;
+}
+u32 *msm_slim_manage_tx_msgq(struct msm_slim_ctrl *dev, bool getbuf,
+					struct completion *comp)
+{
+	int ret = 0;
+	int retries = 0;
+	u32 *retbuf = NULL;
+
+	mutex_lock(&dev->tx_buf_lock);
+	if (!getbuf) {
+		msm_slim_tx_msg_return(dev);
+		mutex_unlock(&dev->tx_buf_lock);
 		return NULL;
 	}
 
-	
-	dev->tx_idx = ((int)(iovec.addr - mem->phys_base)) / SLIM_MSGQ_BUF_LEN;
+	retbuf = msm_slim_modify_tx_buf(dev, comp);
+	if (retbuf) {
+		mutex_unlock(&dev->tx_buf_lock);
+		return retbuf;
+	}
 
-	return (u32 *)((u8 *)mem->base + (dev->tx_idx * SLIM_MSGQ_BUF_LEN));
+	do {
+		msm_slim_tx_msg_return(dev);
+		retbuf = msm_slim_modify_tx_buf(dev, comp);
+		if (!retbuf)
+			ret = -EAGAIN;
+		else {
+			if (retries > 0)
+				SLIM_INFO(dev, "SLIM TX retrieved:%d retries",
+							retries);
+			mutex_unlock(&dev->tx_buf_lock);
+			return retbuf;
+		}
+
+		usleep_range(100, 250);
+		retries++;
+	} while (ret && (retries < INIT_MX_RETRIES));
+
+	mutex_unlock(&dev->tx_buf_lock);
+	return NULL;
 }
 
 int msm_send_msg_buf(struct msm_slim_ctrl *dev, u32 *buf, u8 len, u32 tx_reg)
@@ -435,12 +510,15 @@ int msm_send_msg_buf(struct msm_slim_ctrl *dev, u32 *buf, u8 len, u32 tx_reg)
 	return msm_slim_post_tx_msgq(dev, (u8 *)buf, len);
 }
 
-u32 *msm_get_msg_buf(struct msm_slim_ctrl *dev, int len)
+u32 *msm_get_msg_buf(struct msm_slim_ctrl *dev, int len,
+			struct completion *comp)
 {
-	if (dev->use_tx_msgqs != MSM_MSGQ_ENABLED)
+	if (dev->use_tx_msgqs != MSM_MSGQ_ENABLED) {
+		dev->wr_comp[0] = comp;
 		return dev->tx_buf;
+	}
 
-	return msm_slim_tx_msgq_return(dev);
+	return msm_slim_manage_tx_msgq(dev, true, comp);
 }
 
 static void
@@ -578,7 +656,8 @@ int msm_slim_connect_endp(struct msm_slim_ctrl *dev,
 		}
 		dev->use_rx_msgqs = MSM_MSGQ_ENABLED;
 	} else {
-		dev->tx_idx = -1;
+		dev->tx_tail = 0;
+		dev->tx_head = 0;
 		dev->use_tx_msgqs = MSM_MSGQ_ENABLED;
 	}
 
@@ -686,15 +765,17 @@ static int msm_slim_init_tx_msgq(struct msm_slim_ctrl *dev, u32 pipe_reg)
 				SPS_O_ACK_TRANSFERS | SPS_O_AUTO_ENABLE;
 
 	
+	
 	ret = msm_slim_sps_mem_alloc(dev, descr,
-				MSM_TX_BUFS * sizeof(struct sps_iovec));
+				(MSM_TX_BUFS + 1) * sizeof(struct sps_iovec));
 	if (ret) {
 		dev_err(dev->dev, "unable to allocate SPS descriptors\n");
 		goto alloc_descr_failed;
 	}
 
 	
-	ret = msm_slim_sps_mem_alloc(dev, mem, MSM_TX_BUFS * SLIM_MSGQ_BUF_LEN);
+	ret = msm_slim_sps_mem_alloc(dev, mem, ((MSM_TX_BUFS + 1) *
+					SLIM_MSGQ_BUF_LEN));
 	if (ret) {
 		dev_err(dev->dev, "dma_alloc_coherent failed\n");
 		goto alloc_buffer_failed;
@@ -836,10 +917,16 @@ static void msm_slim_remove_ep(struct msm_slim_ctrl *dev,
 
 void msm_slim_sps_exit(struct msm_slim_ctrl *dev, bool dereg)
 {
+	int i;
+
 	if (dev->use_rx_msgqs >= MSM_MSGQ_ENABLED)
 		msm_slim_remove_ep(dev, &dev->rx_msgq, &dev->use_rx_msgqs);
 	if (dev->use_tx_msgqs >= MSM_MSGQ_ENABLED)
 		msm_slim_remove_ep(dev, &dev->tx_msgq, &dev->use_tx_msgqs);
+	for (i = dev->port_b; i < MSM_SLIM_NPORTS; i++) {
+		if (dev->pipes[i - dev->port_b].connected)
+			msm_slim_disconn_pipe_port(dev, i - dev->port_b);
+	}
 	if (dereg) {
 		int i;
 		for (i = dev->port_b; i < MSM_SLIM_NPORTS; i++) {

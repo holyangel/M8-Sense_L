@@ -9,6 +9,10 @@
 #include <mach/debug_display.h>
 #include "../../../../drivers/video/msm/mdss/mdss_dsi.h"
 
+#ifdef CONFIG_HTC_PNPMGR
+extern void set_screen_status(bool onoff);
+#endif
+
 #define PANEL_ID_DLX_SHARP_RENESAS	0
 #define PANEL_ID_M8_SHARP_NT35595	1
 #define PANEL_ID_M8_LG_RENESAS		2
@@ -474,6 +478,9 @@ static int htc_m8_panel_power_on(struct mdss_panel_data *pdata, int enable)
 	}
 	PR_DISP_INFO("%s: en=%d done\n", __func__, enable);
 
+#ifdef CONFIG_HTC_PNPMGR
+	set_screen_status(enable);
+#endif
 	return 0;
 }
 

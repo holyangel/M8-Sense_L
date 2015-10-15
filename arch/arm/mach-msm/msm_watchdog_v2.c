@@ -39,7 +39,7 @@
 #define MPM_SCLK_COUNT_VAL	(0x0)
 #define MPM_SLEEP_CLK_BASE	(MSM_MPM_SLEEPTICK_BASE + MPM_SCLK_COUNT_VAL)
 
-#ifdef CONFIG_ARCH_DUMMY
+#ifdef CONFIG_ARCH_MSM8226
 extern bool htc_pvs_adjust;
 extern u32  htc_pvs_adjust_seconds;
 
@@ -108,12 +108,22 @@ struct msm_watchdog_data {
 };
 
 #if defined(CONFIG_HTC_DEBUG_WATCHDOG)
+/**
+ * suspend_watchdog_deferred:
+ * Parameter to decide whether to defer suspension of watchdog. If set as 1, suspend
+ * console is deferred to latter stages.
+ */
 int suspend_watchdog_deferred;
 module_param_named(
        suspend_watchdog_deferred, suspend_watchdog_deferred, int, S_IRUGO | S_IWUSR | S_IWGRP
 );
 #endif
 
+/*
+ * On the kernel command line specify
+ * msm_watchdog_v2.enable=1 to enable the watchdog
+ * By default watchdog is turned on
+ */
 static int enable = 1;
 module_param(enable, int, 0);
 #if defined(CONFIG_HTC_DEBUG_WATCHDOG)
@@ -155,6 +165,11 @@ void msm_watchdog_reset(void)
 EXPORT_SYMBOL(msm_watchdog_reset);
 #endif
 
+/*
+ * On the kernel command line specify
+ * msm_watchdog_v2.WDT_HZ=<clock val in HZ> to set Watchdog
+ * ticks. By default it is set to 32765.
+ */
 static long WDT_HZ = 32765;
 module_param(WDT_HZ, long, 0);
 
@@ -195,6 +210,11 @@ static int msm_watchdog_suspend(struct device *dev)
 
 #if defined(CONFIG_HTC_DEBUG_WATCHDOG)
 	if (suspend_watchdog_deferred) {
+		/* for deferred watchdog suspend, it won't write petting utc time.
+		 * This is because timekeeping is suspended, we need to write it here.
+		 * It might cause 50 ~ 100 ms offset to real watchdog petting time
+		 * for suspending watchdog.
+		 */
 		set_msm_watchdog_pet_time_utc();
 		return 0;
 	}
@@ -231,6 +251,11 @@ static int msm_watchdog_resume(struct device *dev)
 
 #if defined(CONFIG_HTC_DEBUG_WATCHDOG)
 	if (suspend_watchdog_deferred) {
+		/* for deferred watchdog suspend, it won't write petting utc time.
+		 * This is because timekeeping is suspended, we need to write it here.
+		 * It might cause 50 ~ 100 ms offset to real watchdog petting time
+		 * for suspending watchdog.
+		 */
 		set_msm_watchdog_pet_time_utc();
 		return 0;
 	}
@@ -318,12 +343,12 @@ static void wdog_disable(struct msm_watchdog_data *wdog_dd)
 	} else
 		devm_free_irq(wdog_dd->dev, wdog_dd->bark_irq, wdog_dd);
 	enable = 0;
-	
+	/*Ensure all cpus see update to enable*/
 	smp_mb();
 	atomic_notifier_chain_unregister(&panic_notifier_list,
 						&wdog_dd->panic_blk);
 	cancel_delayed_work_sync(&wdog_dd->dogwork_struct);
-	
+	/* may be suspended after the first write above */
 	__raw_writel(0, wdog_dd->base + WDT0_EN);
 #ifdef CONFIG_HTC_DEBUG_FOOTPRINT
 	set_msm_watchdog_en_footprint(0);
@@ -440,6 +465,10 @@ static void keep_alive_response(void *info)
 	smp_mb();
 }
 
+/*
+ * If this function does not return, it implies one of the
+ * other cpu's is not responsive.
+ */
 static void ping_other_cpus(struct msm_watchdog_data *wdog_dd)
 {
 	int cpu;
@@ -462,20 +491,23 @@ static void pet_watchdog_work(struct work_struct *work)
 			ping_other_cpus(wdog_dd);
 		pet_watchdog(wdog_dd);
 	}
+	/* Check again before scheduling *
+	 * Could have been changed on other cpu */
 	if (enable)
 		queue_delayed_work_on(0, wdog_wq,
 				&wdog_dd->dogwork_struct, delay_time);
 
 #if defined(CONFIG_HTC_DEBUG_WATCHDOG)
 	htc_debug_watchdog_update_last_pet(wdog_dd->last_pet);
+/* TODO: support this funciton with CONFIG_SPARSE_IRQ */
 #if !defined(CONFIG_SPARSE_IRQ)
-	
+	/* records last_irqs */
 	htc_debug_watchdog_dump_irqs(0);
 #endif
-#endif 
+#endif /* CONFIG_HTC_DEBUG_WATCHDOG */
 
-#ifdef CONFIG_ARCH_DUMMY
-	
+#ifdef CONFIG_ARCH_MSM8226
+	/* FIXME: Adjust PVS table after htc_pvs_adjust_seconds for MSM8x26 */
 	if ((mpm_get_timetick() > (htc_pvs_adjust_seconds*WDT_HZ)) && htc_pvs_adjust) {
 		htc_pvs_adjust = false;
 	}
@@ -529,7 +561,7 @@ static irqreturn_t wdog_bark_handler(int irq, void *dev_id)
 	set_msm_watchdog_pet_footprint((unsigned int)MPM_SLEEP_CLK_BASE);
 #endif
 	mb();
-	
+	/* Delay to make sure bite occurs */
 	mdelay(1);
 	pr_err("Wdog - STS: 0x%x, CTL: 0x%x, BARK TIME: 0x%x, BITE TIME: 0x%x",
 		__raw_readl(wdog_dd->base + WDT0_STS),
@@ -587,6 +619,11 @@ static void configure_bark_dump(struct msm_watchdog_data *wdog_dd)
 	} else {
 		pr_err("Allocating register save space failed\n"
 			       "Registers won't be dumped on a dog bite\n");
+		/*
+		 * No need to bail if allocation fails. Simply don't
+		 * send the command, and the secure side will reset
+		 * without saving registers.
+		 */
 	}
 }
 

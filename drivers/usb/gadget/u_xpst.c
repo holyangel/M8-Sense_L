@@ -41,7 +41,7 @@ static struct diag_request *htc_write_diag_req;
 #define TRX_REQ_BUF_SZ 8192
 #define DEBUG_DMBYTES_RECV 3
 
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 static	uint16_t nv7K9K_table[NV_TABLE_SZ] = {82,
 0, 4, 5, 20, 21, 37, 258, 318, 460, 461,
 462, 463, 464, 465, 466, 546, 707, 714, 854, 1943,
@@ -66,17 +66,19 @@ static	uint16_t nv7K9Kdiff_table[NV_TABLE_SZ] = {14,
 
 static	uint16_t nv9Konly_table[NV_TABLE_SZ] = {7, 579, 580, 1192, 1194, 4204, 4964, 818};
 
+/*mode reset */
 static	uint16_t M297K9K_table[M29_TABLE_SZ] = {4, 1, 2, 4, 5};
 static	uint16_t M297Konly_table[M29_TABLE_SZ];
 static	uint16_t M297K9Kdiff_table[M29_TABLE_SZ];
 static	uint16_t M299Konly_table[M29_TABLE_SZ];
 
+/*PRL read/write*/
 static	uint16_t PRL7K9K_table[PRL_TABLE_SZ] = {1, 0};
 static	uint16_t PRL7Konly_table[PRL_TABLE_SZ];
 static	uint16_t PRL7K9Kdiff_table[PRL_TABLE_SZ];
 static	uint16_t PRL9Konly_table[PRL_TABLE_SZ];
 
-static int radio_initialized; 
+static int radio_initialized; /*radio can response 0xc command*/
 
 static int diag2arm9query;
 #define XPST_SMD	0
@@ -85,6 +87,7 @@ static int diag2arm9query;
 
 #endif
 
+/* 8064 is the platform that modem located in external 9k */
 static struct diag_context *get_modem_ctxt(void)
 {
 #if defined(CONFIG_ARCH_APQ8064)
@@ -127,6 +130,7 @@ static void diag_req_free(struct usb_request *req)
 
 
 
+/* add a request to the tail of a list */
 static void xpst_req_put(struct diag_context *ctxt, struct list_head *head,
 		struct usb_request *req)
 {
@@ -137,6 +141,7 @@ static void xpst_req_put(struct diag_context *ctxt, struct list_head *head,
 	spin_unlock_irqrestore(&ctxt->req_lock, flags);
 }
 
+/* remove a request from the head of a list */
 static struct usb_request *xpst_req_get(struct diag_context *ctxt,
 		struct list_head *head)
 {
@@ -153,7 +158,7 @@ static struct usb_request *xpst_req_get(struct diag_context *ctxt,
 	return req;
 }
 
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 int decode_encode_hdlc(void*data, int *len, unsigned char *buf_hdlc, int remove, int pos)
 {
 	struct diag_send_desc_type send = { NULL, NULL, DIAG_STATE_START, 0 };
@@ -291,11 +296,11 @@ int checkcmd_modem_epst(unsigned char *buf)
 			DIAG_INFO("%s:id = 0x%x no default routing path\n", __func__, *(buf+1));
 		return NO_DEF_ID;
 	} else {
-		
+		/*DIAG_INFO("%s: not EPST_PREFIX id = 0x%x route to USB!!!\n", __func__, *buf);*/
 		return NO_PST;
 	}
 
-#elif defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#elif defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 	if (*buf == 0xc && radio_initialized == 0 && diag2arm9query) {
 		DIAG_INFO("%s: modem is ready\n", __func__);
 		radio_initialized = 1;
@@ -323,7 +328,7 @@ int modem_to_userspace(void *buf, int r, int type, int is9k)
 
 	struct diag_context *ctxt = get_modem_ctxt();
 	struct usb_request *req;
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 	unsigned char value;
 #endif
 
@@ -340,7 +345,7 @@ int modem_to_userspace(void *buf, int r, int type, int is9k)
 	}
 	memcpy(req->buf, buf, r);
 
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 	if (type == DM7K9KDIFF) {
 		value = *((uint8_t *)req->buf+1);
 		if ((value == 0x27) || (value == 0x26)) {
@@ -348,7 +353,7 @@ int modem_to_userspace(void *buf, int r, int type, int is9k)
 				decode_encode_hdlc(buf, &r, req->buf, 0, 3);
 		}
 	} else if (type == NO_DEF_ID) {
-		
+		/*in this case, cmd may reply error message*/
 		value = *((uint8_t *)req->buf+2);
 		DIAG_INFO("%s:check error cmd=0x%x message=ox%x\n", __func__
 				, value, *((uint8_t *)req->buf+1));
@@ -367,11 +372,13 @@ int modem_to_userspace(void *buf, int r, int type, int is9k)
 		print_hex_dump(KERN_DEBUG, "DM Read Packet Data"
 				" from 7k radio (first 16 Bytes): ", DUMP_PREFIX_ADDRESS, 16, 1, req->buf, 16, 1);
 #if defined(CONFIG_DIAGFWD_BRIDGE_CODE)
+	/* diagfwd_write_complete_hsic is called after the asynchronous
+	 * usb_diag_write() on mdm channel is complete */
 	diagfwd_write_complete_hsic(NULL);
 	if (driver->hsic_ch)
 		queue_work(diag_bridge[HSIC].wq, &driver->diag_read_hsic_work);
 #endif
-	
+	/* ctxt->rx_count += r; */
 	req->actual = r;
 	xpst_req_put(ctxt, &ctxt->rx_arm9_done, req);
 	wake_up(&ctxt->read_arm9_wq);
@@ -404,19 +411,19 @@ static long htc_diag_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 #if defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_APQ8064)
 		htc_usb_enable_function(DIAG_MDM, tmp_value);
 #endif
-		
+		// Disable ACM if ##diag is trigger
 		htc_usb_enable_function("acm", 0);
 		htc_usb_enable_function(DIAG_LEGACY, tmp_value);
 
 		if (tmp_value) {
-			
+			/* Never close SMD channel */
 			diag_smd_enable(driver->smd_data[MODEM_DATA].ch, "diag_ioctl", tmp_value);
 		}
 #if defined(CONFIG_MACH_MECHA)
-		
+		/* internal hub*/
 		smsc251x_mdm_port_sw(tmp_value);
 #endif
-		
+		/* force diag_read to return error when disable diag */
 		if (tmp_value == 0)
 			ctxt->error = 1;
 		wake_up(&ctxt->read_wq);
@@ -439,10 +446,12 @@ static long htc_diag_ioctl(struct file *file, unsigned int cmd, unsigned long ar
 		break;
 
 	case USB_DIAG_FUNC_IOC_AMR_SET:
+		/*	if (copy_from_user(&ctxt->is2ARM11, argp, sizeof(int)))
+			return -EFAULT;*/
 		DIAG_INFO("diag: fix me USB_DIAG_FUNC_IOC_AMR_SET\n");
 		break;
 	case USB_DIAG_FUNC_IOC_LOGTYPE_GET:
-		
+		/* to see if logging mode = 1 (USB_MODE) */
 		tmp_value = (driver->logging_mode == 1)?1:0;
 		if (copy_to_user(argp, &tmp_value, sizeof(tmp_value)))
 			return -EFAULT;
@@ -466,7 +475,7 @@ static ssize_t htc_diag_read(struct file *fp, char __user *buf,
 	DIAG_INFO("%s:%s(parent:%s): tgid=%d\n", __func__,
 			current->comm, current->parent->comm, current->tgid);
 
-	
+	/* we will block until we're online */
 	if (!ctxt->online) {
 		ret = wait_event_interruptible(ctxt->read_wq, (ctxt->online || ctxt->error));
 		if (ret < 0 || ctxt->error)
@@ -642,7 +651,7 @@ static int htc_diag_open(struct inode *ip, struct file *fp)
 		}
 	}
 
-	
+	/* clear pending data if any */
 	while ((req = xpst_req_get(ctxt, &ctxt->rx_req_idle)))
 		diag_req_free(req);
 
@@ -658,7 +667,7 @@ static int htc_diag_open(struct inode *ip, struct file *fp)
 	}
 
 	ctxt->opened = true;
-	
+	/* clear the error latch */
 	ctxt->error = 0;
 
 done:
@@ -729,7 +738,10 @@ static int if_route_to_userspace(struct diag_context *ctxt, unsigned int cmd)
 
 	if (!ctxt->opened || cmd_id == 0)
 		return 0;
-	
+	/* command ids 0xfb..0xff are not used by msm diag; we steal these ids
+	 * for communication between userspace tool and host test tool.
+	 */
+	/*printk("cmd_num=%d cmd_id=%d\n", cmd_num, cmd_id);*/
 	if (cmd_id >= 0xfb && cmd_id <= 0xff)
 		return 1;
 
@@ -737,6 +749,9 @@ static int if_route_to_userspace(struct diag_context *ctxt, unsigned int cmd)
 	spin_lock_irqsave(&ctxt->req_lock, flags);
 	for (i = 0; i < ARRAY_SIZE(ctxt->id_table); i = i+2)
 		if (ctxt->id_table[i] == cmd_id) {
+			/* if the command id equals to any of registered ids,
+			 * route to userspace to handle.
+			 */
 			if (ctxt->id_table[i+1] == cmd_num || ctxt->id_table[i+1] == 0xff) {
 				spin_unlock_irqrestore(&ctxt->req_lock, flags);
 				return 1;
@@ -747,7 +762,7 @@ static int if_route_to_userspace(struct diag_context *ctxt, unsigned int cmd)
 	return 0;
 }
 
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 static int check_modem_type(void)
 {
 #if defined(CONFIG_DIAG_SDIO_PIPE)
@@ -805,6 +820,8 @@ static int check_modem_task_ready(int channel)
 	DIAG_INFO("%s:modem status=%d %s\n", __func__, radio_initialized, (ret == 0)?"(timeout)":"");
 
 #if defined(CONFIG_DIAGFWD_BRIDGE_CODE)
+	/* diagfwd_write_complete_hsic is called after the asynchronous
+	 * usb_diag_write() on mdm channel is complete */
 	diagfwd_write_complete_hsic(NULL);
 	if (driver->hsic_ch)
 		queue_work(diag_bridge[HSIC].wq, &driver->diag_read_hsic_work);
@@ -938,7 +955,7 @@ static int diag2arm9_open(struct inode *ip, struct file *fp)
 		rc = -EBUSY;
 		goto done;
 	}
-	
+	/* clear pending data if any */
 	while ((req = xpst_req_get(ctxt, &ctxt->rx_arm9_done)))
 		diag_req_free(req);
 
@@ -963,7 +980,7 @@ static int diag2arm9_open(struct inode *ip, struct file *fp)
 	diag_smd_enable(driver->smd_data[MODEM_DATA].ch, "diag2arm9_open", SMD_FUNC_OPEN_DIAG);
 #endif
 
-	
+	/* Active the diag buffer */
 	driver->smd_data[MODEM_DATA].in_busy_1 = 0;
 	driver->smd_data[MODEM_DATA].in_busy_2 = 0;
 #if defined(CONFIG_MACH_VIGOR)
@@ -992,7 +1009,12 @@ static int diag2arm9_release(struct inode *ip, struct file *fp)
 		diag_req_free(ctxt->read_arm9_req);
 	mutex_unlock(&ctxt->diag2arm9_read_lock);
 
-	
+	/*************************************
+	 * If smd is closed, it will  lead to slate can't be tested.
+	 * slate will open it for one time
+	 * but close it for several times and never open
+	 *************************************/
+	/*smd_diag_enable("diag2arm9_release", 0);*/
 	mutex_unlock(&ctxt->diag2arm9_lock);
 #if defined(CONFIG_MACH_VIGOR)
 	kfree(diag2arm9_buf_9k);
@@ -1006,7 +1028,7 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 	struct diag_context *ctxt = get_modem_ctxt();
 	int r = count;
 	int writed = 0;
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 	int path;
 	struct diag_hdlc_decode_type hdlc;
 	int ret;
@@ -1041,7 +1063,7 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 		}
 #endif
 
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 		path = checkcmd_modem_epst(ctxt->DM_buf);
 
 		print_hex_dump(KERN_DEBUG, "DM Packet Data"
@@ -1050,7 +1072,7 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 		switch (path) {
 		case DM7K9K:
 			DIAG_INFO("%s:above date to DM7K9K\n", __func__);
-			
+			/* send to 9k before decode HDLC*/
 #if defined(CONFIG_MACH_MECHA)
 			if (sdio_diag_initialized) {
 				buf_9k = kzalloc(writed, GFP_KERNEL);
@@ -1072,7 +1094,7 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 				DIAG_INFO("%s: sdio ch fails\n", __func__);
 			}
 #endif
-			
+			/* send to 8k after decode HDLC*/
 			hdlc.dest_ptr = ctxt->toARM9_buf;
 			hdlc.dest_size = SMD_MAX;
 			hdlc.src_ptr = ctxt->DM_buf;
@@ -1120,6 +1142,12 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 			ret = diag_bridge_write(ctxt->DM_buf, writed);
 			if (ret) {
 				DIAG_INFO(": diag_bridge write failed %d\n", ret);
+				/*
+				 * If the error is recoverable, then clear
+				 * the write flag, so we will resubmit a
+				 * write on the next frame.  Otherwise, don't
+				 * resubmit a write on the next frame.
+				 */
 				if ((-ESHUTDOWN) != ret)
 					driver->in_busy_hsic_write = 0;
 			}
@@ -1128,7 +1156,7 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 			break;
 		case DM7K9KDIFF:
 			DIAG_INFO("%s:above data to DM7K9KDIFF\n", __func__);
-			
+			/* send to 9k before decode HDLC*/
 			if ((ctxt->DM_buf[3] & 0x80) == 0x80) {
 				DIAG_INFO("%s:DM7K9KDIFF to 9K\n", __func__);
 #if defined(CONFIG_MACH_MECHA)
@@ -1166,7 +1194,7 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 				smd_write(driver->smd_data[MODEM_DATA].ch, ctxt->DM_buf, writed);
 #endif
 #if defined(CONFIG_MACH_VIGOR)
-				
+				/* send to 8k after decode HDLC*/
 				hdlc.dest_ptr = ctxt->toARM9_buf;
 				hdlc.dest_size = SMD_MAX;
 				hdlc.src_ptr = ctxt->DM_buf;
@@ -1191,7 +1219,7 @@ static ssize_t diag2arm9_write(struct file *fp, const char __user *buf,
 #if !defined(CONFIG_MACH_VIGOR)
 			smd_write(driver->smd_cmd[MODEM_DATA].ch, ctxt->DM_buf, writed);
 #else
-			
+			/* send to 8k after decode HDLC*/
 			hdlc.dest_ptr = ctxt->toARM9_buf;
 			hdlc.dest_size = SMD_MAX;
 			hdlc.src_ptr = ctxt->DM_buf;
@@ -1240,16 +1268,16 @@ static ssize_t diag2arm9_read(struct file *fp, char __user *buf,
 	DIAG_INFO("%s\n", __func__);
 	mutex_lock(&ctxt->diag2arm9_read_lock);
 
-	
+	/* if we have data pending, give it to userspace */
 	if (ctxt->read_arm9_count > 0)
 		req = ctxt->read_arm9_req;
 	else {
 retry:
-		
+		/* get data from done queue */
 		req = 0;
-		ret = wait_event_interruptible_timeout(ctxt->read_arm9_wq,
+		ret = wait_event_interruptible(ctxt->read_arm9_wq,
 				((req = xpst_req_get(ctxt, &ctxt->rx_arm9_done)) ||
-				 !ctxt->diag2arm9_opened), 2 * HZ);
+				 !ctxt->diag2arm9_opened));
 		if (!ctxt->diag2arm9_opened) {
 			if (req)
 				xpst_req_put(ctxt, &ctxt->rx_arm9_idle, req);
@@ -1276,7 +1304,7 @@ retry:
 	ctxt->read_arm9_buf += xfer;
 	ctxt->read_arm9_count -= xfer;
 	r += xfer;
-	
+	/* if we've emptied the buffer, release the request */
 	if (ctxt->read_arm9_count == 0) {
 		print_hex_dump(KERN_DEBUG, "DM Packet Data"
 				" read from radio ", DUMP_PREFIX_ADDRESS, 16, 1, req->buf, req->actual, 1);
@@ -1295,7 +1323,7 @@ static struct file_operations diag2arm9_fops = {
 	.release = diag2arm9_release,
 	.write = diag2arm9_write,
 	.read = diag2arm9_read,
-#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_DUMMY)
+#if defined(CONFIG_MACH_MECHA) || defined(CONFIG_MACH_VIGOR) || defined(CONFIG_ARCH_MSM8960) || defined(CONFIG_ARCH_MSM8974) || defined(CONFIG_ARCH_MSM8226)
 	.unlocked_ioctl = diag2arm9_ioctl,
 #endif
 };

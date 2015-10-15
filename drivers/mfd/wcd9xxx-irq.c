@@ -96,7 +96,7 @@ static void wcd9xxx_irq_enable(struct irq_data *data)
 	struct wcd9xxx_core_resource *wcd9xxx_res =
 			irq_data_get_irq_chip_data(data);
 	int wcd9xxx_irq = virq_to_phyirq(wcd9xxx_res, data->irq);
-	if (BIT_BYTE(wcd9xxx_irq) < WCD9XXX_MAX_IRQ_REGS)
+	if ((BIT_BYTE(wcd9xxx_irq) < WCD9XXX_MAX_IRQ_REGS) && (BIT_BYTE(wcd9xxx_irq) >= 0))
 		wcd9xxx_res->irq_masks_cur[BIT_BYTE(wcd9xxx_irq)] &=
 			~(BYTE_BIT_MASK(wcd9xxx_irq));
 }
@@ -106,7 +106,7 @@ static void wcd9xxx_irq_disable(struct irq_data *data)
 	struct wcd9xxx_core_resource *wcd9xxx_res =
 			irq_data_get_irq_chip_data(data);
 	int wcd9xxx_irq = virq_to_phyirq(wcd9xxx_res, data->irq);
-	if (BIT_BYTE(wcd9xxx_irq) < WCD9XXX_MAX_IRQ_REGS)
+	if ((BIT_BYTE(wcd9xxx_irq) < WCD9XXX_MAX_IRQ_REGS) && (BIT_BYTE(wcd9xxx_irq) >= 0))
 		wcd9xxx_res->irq_masks_cur[BIT_BYTE(wcd9xxx_irq)]
 			|= BYTE_BIT_MASK(wcd9xxx_irq);
 }

@@ -364,7 +364,7 @@ static void __exit imx214_800m_fov77_exit_module(void)
 	return;
 }
 
-#if defined(CONFIG_MACH_EYE_UL) || defined(CONFIG_MACH_EYE_WHL) || defined(CONFIG_MACH_EYE_WL)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
 static int imx214_800m_fov77_match_otp_info(void)
 {
 	if (otp[3] == 0x11)
@@ -392,7 +392,7 @@ int32_t imx214_800m_fov77_sensor_match_id(struct msm_sensor_ctrl_t *s_ctrl)
 			} else
 				first = 1;
 	    }
-#if defined(CONFIG_MACH_EYE_UL) || defined(CONFIG_MACH_EYE_WHL) || defined(CONFIG_MACH_EYE_WL)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
 		rc = imx214_800m_fov77_match_otp_info();
 #endif
 	}

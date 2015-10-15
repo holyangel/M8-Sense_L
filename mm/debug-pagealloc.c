@@ -164,7 +164,7 @@ void htc_trace_pages_user(struct page *page, int numpages, int free)
 #else
 static inline
 void htc_trace_pages_user(struct page *page, int numpages, int free) { }
-#endif 
+#endif /* CONFIG_HTC_DEBUG_PAGE_USER_TRACE */
 
 void kernel_map_pages(struct page *page, int numpages, int enable)
 {

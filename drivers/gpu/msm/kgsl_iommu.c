@@ -506,6 +506,7 @@ done:
 		struct kgsl_iommu_unit *iommu_unit;
 		if (iommu->unit_count == i)
 			i--;
+		iommu_unit = &iommu->iommu_units[i];
 		do {
 			for (j--; j >= 0; j--)
 				kgsl_iommu_disable_clk(mmu, ctx_id);

@@ -2227,6 +2227,7 @@ static int diagchar_write(struct file *file, const char __user *buf,
 		} else {
 			pkt_type ^= DCI_PKT_TYPE;
 			diagmem_free(driver, buf_copy, POOL_TYPE_COPY);
+			buf_copy = NULL;
 			return 0;
 		}
 
@@ -2234,6 +2235,7 @@ static int diagchar_write(struct file *file, const char __user *buf,
 			|| ((driver->logging_mode == USB_MODE) &&
 			(!driver->usb_connected))) {
 			diagmem_free(driver, buf_copy, POOL_TYPE_COPY);
+			buf_copy = NULL;
 			return 0;
 		}
 	}
@@ -2250,6 +2252,7 @@ static int diagchar_write(struct file *file, const char __user *buf,
 				__func__);
 
 		diagmem_free(driver, buf_copy, POOL_TYPE_COPY);
+		buf_copy = NULL;
 		return 0;
 	}
 

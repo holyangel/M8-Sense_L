@@ -5088,13 +5088,13 @@ static struct clk_lookup msm_clocks_8974_common[] __initdata = {
 
 	
 	CLK_LOOKUP("cam_src_clk", mclk0_clk_src.c, "6e.qcom,camera"),
-#ifdef CONFIG_MACH_DUMMY
+#ifdef CONFIG_MACH_GLU_U
 	CLK_LOOKUP("cam_src_clk", mmss_gp0_clk_src.c, "20.qcom,camera"),
 	CLK_LOOKUP("cam_src_clk", mmss_gp0_clk_src.c, "0.qcom,camera"),
 	CLK_LOOKUP("cam_src_clk", gp1_clk_src.c, "6c.qcom,camera"),
 	CLK_LOOKUP("cam_src_clk", mclk2_clk_src.c, "90.qcom,camera"),
 #else
-#if defined(CONFIG_MACH_MEC_DUG) || defined(CONFIG_MACH_MEC_UL) || defined(CONFIG_MACH_MEC_TL) || defined(CONFIG_MACH_MEC_WHL) || defined(CONFIG_MACH_MEC_DWG)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
 	CLK_LOOKUP("cam_src_clk", mclk0_clk_src.c, "6c.qcom,camera"),
 	CLK_LOOKUP("cam_src_clk", mclk2_clk_src.c, "20.qcom,camera"),
 #else
@@ -5106,13 +5106,13 @@ static struct clk_lookup msm_clocks_8974_common[] __initdata = {
 	CLK_LOOKUP("cam_src_clk", mclk0_clk_src.c, "0.qcom,camera"),
 #endif
 	CLK_LOOKUP("cam_clk", camss_mclk0_clk.c, "6e.qcom,camera"),
-#ifdef CONFIG_MACH_DUMMY
+#ifdef CONFIG_MACH_GLU_U
 	CLK_LOOKUP("cam_clk", camss_gp0_clk.c, "20.qcom,camera"),
 	CLK_LOOKUP("cam_clk", camss_gp0_clk.c, "0.qcom,camera"),
 	CLK_LOOKUP("cam_clk", gcc_gp1_clk.c, "6c.qcom,camera"),
 	CLK_LOOKUP("cam_clk", camss_mclk2_clk.c, "90.qcom,camera"),
 #else
-#if defined(CONFIG_MACH_MEC_DUG) || defined(CONFIG_MACH_MEC_UL) || defined(CONFIG_MACH_MEC_TL) || defined(CONFIG_MACH_MEC_WHL) || defined(CONFIG_MACH_MEC_DWG)
+#if defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY) || defined(CONFIG_MACH_DUMMY)
 	CLK_LOOKUP("cam_clk", camss_mclk0_clk.c, "6c.qcom,camera"),
 	CLK_LOOKUP("cam_clk", camss_mclk2_clk.c, "20.qcom,camera"),
 #else

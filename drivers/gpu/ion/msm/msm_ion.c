@@ -796,6 +796,7 @@ static int msm_ion_get_heap_size(struct device_node *node,
 			goto out;
 		}
 		heap->size = (u32) size;
+		ret = 0;
 		of_node_put(pnode);
 	}
 

@@ -24,6 +24,7 @@ static int gpu_fault_no_panic_get(void *data, u64 *val)
 	return 0;
 }
 
+/* debug fs node "contexpid_dump" show func */
 static int ctx_dump_set(void* data, u64 val)
 {
 	struct kgsl_device *device = data;
@@ -34,6 +35,7 @@ static int ctx_dump_set(void* data, u64 val)
 	return 0;
 }
 
+/* define debug fs node "contexpid_dump" */
 DEFINE_SIMPLE_ATTRIBUTE(ctx_dump_fops,
 				NULL,
 				ctx_dump_set, "%llu\n");
@@ -42,6 +44,8 @@ DEFINE_SIMPLE_ATTRIBUTE(gpu_fault_no_panic_fops,
 				gpu_fault_no_panic_get,
 				gpu_fault_no_panic_set, "%llu\n");
 
+/* API for meminfo to query how much page kgsl allocate
+ */
 unsigned int kgsl_get_alloc_size(int detailed)
 {
 	struct kgsl_driver_htc_priv *priv = &kgsl_driver.priv;
@@ -54,6 +58,9 @@ unsigned int kgsl_get_alloc_size(int detailed)
 	return kgsl_driver.stats.page_alloc;
 }
 
+/* use Queue work to print each process memory usage
+ * to prevent dead lock by process_mutex
+ */
 static void do_print_mem_detail(struct work_struct *work)
 {
 	struct kgsl_driver_htc_priv *priv = container_of(work,
@@ -82,6 +89,8 @@ static void do_print_mem_detail(struct work_struct *work)
 	mutex_unlock(&driver->process_mutex);
 }
 
+/* init data structures which plug-in kgsl_driver structure
+ */
 int kgsl_driver_htc_init(struct kgsl_driver_htc_priv *priv)
 {
 	priv->next_jiffies = jiffies;
@@ -89,6 +98,8 @@ int kgsl_driver_htc_init(struct kgsl_driver_htc_priv *priv)
 	return 0;
 }
 
+/* init htc feature in kgsl_device_platform_probe function
+ */
 int kgsl_device_htc_init(struct kgsl_device *device)
 {
 	device->gpu_fault_no_panic = CONFIG_MSM_KGSL_DEFAULT_GPU_HUNG_NO_PANIC;
@@ -102,6 +113,9 @@ int kgsl_device_htc_init(struct kgsl_device *device)
 	return 0;
 }
 
+/* Dump pid informations of all contexts
+ * caller need to hold context_lock
+ */
 void kgsl_dump_contextpid_locked(struct idr *context_idr)
 {
 	int i = 0;
@@ -178,7 +192,7 @@ static int adreno_kill_suspect(struct kgsl_device *device, int pid)
 	else
 		suspect_task_parent_comm[0] = '\0';
 
-	
+	/* ToDo: Have potential risk by using hard code to filter processes */
 
 	for (i = 0; i < ARRAY_SIZE(kgsl_blocking_process_tbl); i++) {
 		if (!((strncmp(suspect_task_comm,
@@ -208,6 +222,7 @@ static int adreno_kill_suspect(struct kgsl_device *device, int pid)
 }
 #endif
 
+/* enter panic/kill process when GPU fault happened */
 void adreno_fault_panic(struct kgsl_device *device, unsigned int pid, int fault) {
 
 	char fault_string[512];

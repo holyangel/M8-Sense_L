@@ -39,9 +39,6 @@ extern void set_gpu_clk(unsigned int);
 #define INIT_UDELAY		200
 #define MAX_UDELAY		2000
 
-//gboost
-int graphics_boost = 4;
-
 struct clk_pair {
 	const char *name;
 	uint map;
@@ -181,9 +178,6 @@ void kgsl_pwrctrl_pwrlevel_change(struct kgsl_device *device,
 
 
 	trace_kgsl_pwrlevel(device, pwr->active_pwrlevel, pwrlevel->gpu_freq);
-
-//gboost
-        graphics_boost = pwr->active_pwrlevel;
 }
 
 EXPORT_SYMBOL(kgsl_pwrctrl_pwrlevel_change);
@@ -440,18 +434,10 @@ static int kgsl_pwrctrl_gpuclk_show(struct device *dev,
 {
 	struct kgsl_device *device = kgsl_device_from_dev(dev);
 	struct kgsl_pwrctrl *pwr;
-	unsigned int level;
-
 	if (device == NULL)
 		return 0;
 	pwr = &device->pwrctrl;
-
-	if (device->state == KGSL_STATE_SLUMBER)
-		level = pwr->num_pwrlevels - 1;
-	else
-		level = pwr->active_pwrlevel;
-	return snprintf(buf, PAGE_SIZE, "%d\n",
-			pwr->pwrlevels[level].gpu_freq);
+	return snprintf(buf, PAGE_SIZE, "%ld\n", kgsl_pwrctrl_active_freq(pwr));
 }
 
 static int kgsl_pwrctrl_idle_timer_store(struct device *dev,

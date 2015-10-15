@@ -2271,7 +2271,7 @@ void diag_smd_enable(smd_channel_t *ch, char *src, int mode)
 	diag_smd_function_mode = mode;
 	if (mode) {
 		if (!driver->smd_data[index].ch) {
-			r = smd_open("DIAG", &driver->smd_data[index].ch, driver, diag_smd_notify);
+			r = smd_open("DIAG", &driver->smd_data[index].ch, &driver->smd_data[index], diag_smd_notify);
 		if (!r)
 			_ch = driver->smd_data[index].ch;
 		} else

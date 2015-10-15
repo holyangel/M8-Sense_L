@@ -318,6 +318,7 @@
 		htc,cabc-video-cmds = [39 01 00 00 00 00 02 55 83];
 		qcom,mdss-dsi-lp11-init;
 		htc,mdss-camera-blk = <189>;
+		htc,skip-frame;
 		htc,panel-id=<1>;
 	};
 

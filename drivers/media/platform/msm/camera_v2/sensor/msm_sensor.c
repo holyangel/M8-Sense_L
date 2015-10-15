@@ -1192,6 +1192,9 @@ int msm_camera_config_single_ncp6924_vreg(struct device *dev,
 		if (IS_ERR(*reg_ptr)) {
 			pr_err("%s: %s get failed\n", __func__,
 				ncp6924_vreg->reg_name);
+			
+			regulator_put(*reg_ptr);
+			
 			*reg_ptr = NULL;
 			goto vreg_get_fail;
 		}
@@ -1828,7 +1831,7 @@ int32_t msm_sensor_config(struct msm_sensor_ctrl_t *s_ctrl,
 		cdata->cfg.sensor_info.sensor_mirror_flip=
 			s_ctrl->sensordata->sensor_info->sensor_mirror_flip;
 		memcpy(cdata->cfg.sensor_info.OTP_INFO, s_ctrl->sensordata->sensor_info->OTP_INFO, 5);
-		memcpy(cdata->cfg.sensor_info.fuse_id, s_ctrl->sensordata->sensor_info->fuse_id, 5);
+		memcpy(cdata->cfg.sensor_info.fuse_id, s_ctrl->sensordata->sensor_info->fuse_id, 4);
 		
 
 		break;

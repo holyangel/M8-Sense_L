@@ -348,7 +348,7 @@ static int snd_usb_audio_create(struct usb_device *dev, int idx,
 	}
 
 	strcpy(card->driver, "USB-Audio");
-	sprintf(component, "USB%04x:%04x",
+	snprintf(component, sizeof(component), "USB%04x:%04x",
 		USB_ID_VENDOR(chip->usb_id), USB_ID_PRODUCT(chip->usb_id));
 	snd_component_add(card, component);
 
@@ -360,7 +360,7 @@ static int snd_usb_audio_create(struct usb_device *dev, int idx,
 		    usb_string(dev, dev->descriptor.iProduct,
 		    card->shortname, sizeof(card->shortname)) <= 0) {
 			
-			sprintf(card->shortname, "USB Device %#04x:%#04x",
+			snprintf(card->shortname, sizeof(card->shortname), "USB Device %#04x:%#04x",
 				USB_ID_VENDOR(chip->usb_id),
 				USB_ID_PRODUCT(chip->usb_id));
 		}

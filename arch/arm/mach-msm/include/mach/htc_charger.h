@@ -83,6 +83,8 @@ struct htc_charger {
 	int (*get_charging_enabled)(int *result);
 	int (*event_notify)(enum htc_extchg_event_type etype);
 	int (*set_charger_enable)(bool enable);
+	int (*set_charger_after_eoc)(bool enable);
+	int (*check_recharge_recover)(void);
 	int (*set_pwrsrc_enable)(bool enable);
 	int (*set_pwrsrc_and_charger_enable)
 			(enum htc_power_source_type src,

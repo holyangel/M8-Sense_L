@@ -941,7 +941,7 @@ int slim_xfer_msg(struct slim_controller *ctrl, struct slim_device *sbdev,
 	int ret;
 	u16 sl, cur;
 	u16 ec;
-	u8 tid = 0, mlen = 6;
+	u8 tid, mlen = 6;
 
 	ret = slim_ele_access_sanity(msg, mc, rbuf, wbuf, len);
 	if (ret)
@@ -995,7 +995,7 @@ int slim_xfer_msg(struct slim_controller *ctrl, struct slim_device *sbdev,
 	} else
 		ret = slim_processtxn(ctrl, SLIM_MSG_DEST_LOGICALADDR, mc, ec,
 				SLIM_MSG_MT_CORE, rbuf, wbuf, len, mlen,
-				NULL, sbdev->laddr, NULL);
+				msg->comp, sbdev->laddr, NULL);
 xfer_err:
 	return ret;
 }

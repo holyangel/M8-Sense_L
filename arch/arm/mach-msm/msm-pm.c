@@ -841,7 +841,7 @@ static int ramp_up_first_cpu(int cpu, int saved_rate)
 	return rc;
 }
 
-#ifdef CONFIG_ARCH_DUMMY
+#ifdef CONFIG_ARCH_MSM8226
 extern int pming;
 #endif
 
@@ -862,7 +862,7 @@ static enum msm_pm_time_stats_id msm_pm_power_collapse(bool from_idle)
 			clock_blocked_print();
 #endif
 	}
-#ifdef CONFIG_ARCH_DUMMY
+#ifdef CONFIG_ARCH_MSM8226
 	if (!cpu && !from_idle)
 		pming = 1;
 #endif
@@ -933,7 +933,7 @@ static enum msm_pm_time_stats_id msm_pm_power_collapse(bool from_idle)
 	if (!cpu && !from_idle)
 		keep_dig_voltage_low_in_idle(true);
 
-#ifdef CONFIG_ARCH_DUMMY
+#ifdef CONFIG_ARCH_MSM8226
 	if (!cpu && !from_idle)
 		pming = 0;
 #endif

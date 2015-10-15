@@ -819,7 +819,8 @@ static int qpnp_mpp_set(struct qpnp_led_data *led, int blink_mode)
 	int rc;
 	u8 val;
 	int duty_us, duty_ns, period_us, pwm_period;
-	mutex_lock(&led->lock);
+	if (blink_mode !=0)
+		mutex_lock(&led->lock);
 	LED_INFO("%s, name:%s, brightness = %d, blink = %d\n", __func__, led->cdev.name, led->cdev.brightness, blink_mode);
 	if (led->cdev.brightness) {
 		if (led->mpp_cfg->mpp_reg && !led->mpp_cfg->enable) {
@@ -1026,6 +1027,7 @@ static int qpnp_mpp_set(struct qpnp_led_data *led, int blink_mode)
 					"reg\n");
 			goto err_mpp_reg_write;
 		}
+	}
 			
 			if (blink_mode == 5) {
 				LED_INFO("MPP LED breath\n");
@@ -1079,7 +1081,7 @@ static int qpnp_mpp_set(struct qpnp_led_data *led, int blink_mode)
 
 		led->mpp_cfg->enable = false;
 	}
-	}
+
 	if (led->mpp_cfg->pwm_mode != MANUAL_MODE)
 		led->mpp_cfg->pwm_cfg->blinking = false;
 	qpnp_dump_regs(led, mpp_debug_regs, ARRAY_SIZE(mpp_debug_regs));
@@ -4343,8 +4345,6 @@ static int qpnp_leds_probe(struct spmi_device *spmi)
 				goto fail_id_check;
 			}
 		}
-
-		INIT_WORK(&led->work, qpnp_led_work);
 
 		rc =  qpnp_led_initialize(led);
 		if (rc < 0)

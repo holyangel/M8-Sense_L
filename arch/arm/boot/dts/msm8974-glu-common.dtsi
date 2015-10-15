@@ -1,0 +1,892 @@
+/* Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+
+/include/ "dsi-panel-glu.dtsi"
+/include/ "msm8974-leds.dtsi"
+/include/ "msm8974-camera-sensor-glu-xa.dtsi"
+
+/ {
+	ram_console {
+		compatible = "ram_console";
+	};
+};
+
+&soc {
+	mhl_usb_detect {
+		mhl_usb_sw_gpio = <&msmgpio 85 0>;
+		mhl_usb_reset_gpio = <&msmgpio 78 0>;
+	};
+
+	serial@f991e000 {
+		status = "ok";
+	};
+
+	qcom,mdss_mdp@fd900000 {
+		qcom,mdss-pref-prim-intf = "dsi";
+	};
+
+	qcom,hdmi_tx@fd922100 {
+		status = "ok";
+	};
+
+	i2c@f9924000 {
+		synaptics@20 {
+			compatible               = "synaptics,3xxx";
+			reg                      = <0x20>;
+			interrupt-parent         = <&msmgpio>;
+			interrupts               = <18 0x2>;
+			synaptics,panel-coords   = <15 1605 13 2730>;
+			synaptics,display-coords = <0 1080 0 1920>;
+			synaptics,irq-gpio       = <&msmgpio 18 0x00>;
+			synaptics,rst-gpio       = <&msmgpio 23 0x00>;
+			synaptics,i2c_err_hlr    = <1>;
+			tw_pin_mask              = <2>;
+
+                        config3 {
+				default_cfg = <1>;
+				pr_number = <1495108>;
+				config = [
+                                        31 32 00 01 00 3F 03 1E
+                                        14 54 06 40 0B F6 48 E1
+                                        42 1C 00 00 00 1A 0F 1E
+                                        05 5D 0F 9D 01 3C 12 01
+                                        13 01 68 BF 68 BF F6 08
+                                        0C 4B 23 0A 1D 01 01 07
+                                        04 04 0A C0 0A 64 3B 3B
+                                        3C 3C FA FA 4D 17 00 15
+                                        1E 32 01 01 00 01 05 0A
+                                        00 FF 00 FA 00 80 04 1B
+                                        00 40 0A 00 00 96 00 00
+                                        00 BF 1E 96 00 00 C0 80
+                                        00 10 0A 18 00 04 40 40
+                                        71 00 05 00 00 78 00 04
+                                        00 03 03 07 07 03 96 00
+                                        02 04 06 5F 00 12 00 00
+                                        00 02 00 02 5C 06 5D 00
+                                        12 00 01 00 02 00 02 60
+                                        06 5B 00 12 00 02 00 02
+                                        00 02 62 06 59 00 11 00
+                                        03 00 02 00 02 64 06 57
+                                        00 11 00 04 00 02 00 02
+                                        66 06 55 00 11 00 05 00
+                                        02 00 02 68 06 54 00 10
+                                        00 06 00 02 00 02 6A 06
+                                        52 00 10 00 07 00 02 00
+                                        02 6C 08 08 08 08 08 08
+                                        08 08 08 08 08 08 08 08
+                                        08 08 08 08 08 08 08 08
+                                        08 08 08 08 04 04 20 00
+                                        05 00 00 00 00 FF FF FF
+                                        FF FF FF FF FF 51 51 51
+                                        51 CD 0D 04 83 10 10 10
+                                        10 00 01 03 06 05 0F 0E
+                                        09 0B 0D 0C 0A 08 07 00
+                                        35 04 2A 29 28 31 30 27
+                                        34 33 32 02 FF FF 13 16
+                                        19 1A 1C 1F 20 14 21 1D
+                                        23 24 25 15 12 FF FF 00
+                                        10 00 10 00 10 00 10 80
+                                        80 80 80 80 80 80 80 80
+                                        80 80 80 80 80 80 80 80
+                                        80 80 80 80 80 80 80 80
+                                        80 80 80 80 80 80 80 80
+                                        80 80 80 80 80 80 80 80
+                                        80 80 80 80 00 10 00 10
+                                        00 10 00 10 03 13 4D 05
+                                        05 11 64 06 01 33 32 C8
+                                        04 28 05 1E
+                                ];
+                        };
+
+			config2 {
+				default_cfg = <1>;
+				pr_number = <1481887>;
+				config = [
+					31 32 00 08 00 3F 03 1E
+					14 54 06 40 0B F6 48 E1
+					42 1C 00 00 00 1A 0F 1E
+					05 5D 2D 2F 05 3C 12 01
+					13 01 68 BF 68 BF F6 0D
+					0C 4B 0C 0A 1D 01 01 07
+					04 04 0A C0 0A 64 3B 3B
+					3C 3C FA FA 5A 4D 00 15
+					1E 32 01 01 00 01 25 0A
+					01 FF 00 D2 00 80 04 1B
+					00 40 0A 00 00 64 00 00
+					00 BF 4B 96 00 00 C0 80
+					00 10 0A 18 00 04 40 40
+					71 00 06 00 00 90 01 04
+					00 03 03 07 07 03 78 00
+					02 04 07 67 00 15 00 00
+					00 02 00 02 52 06 65 00
+					14 00 01 00 02 00 02 56
+					06 62 00 14 00 02 00 02
+					00 02 58 06 60 00 13 00
+					03 00 02 00 02 5A 06 5E
+					00 13 00 04 00 02 00 02
+					5C 06 5C 00 12 00 05 00
+					02 00 02 5E 06 5A 00 12
+					00 06 00 02 00 02 60 06
+					58 00 12 00 07 00 02 00
+					02 62 08 08 08 08 08 08
+					08 08 08 08 08 08 08 08
+					08 08 08 08 08 08 08 08
+					08 08 08 08 00 00 1C 00
+					05 00 00 00 00 FF FF FF
+					FF FF FF FF FF 51 51 51
+					51 CD 0D 04 83 10 10 10
+					10 00 01 03 06 05 0F 0E
+					09 0B 0D 0C 0A 08 07 00
+					35 04 2A 29 28 31 30 27
+					34 33 32 02 FF FF 13 16
+					19 1A 1C 1F 20 14 21 1D
+					23 24 25 15 12 FF FF 00
+					10 00 10 00 10 00 10 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 00 10 00 10
+					00 10 00 10 03 13 4D 05
+					05 11 64 06 01 33 32 C8
+					04 28 05
+				];
+			};
+
+			config1 {
+				default_cfg = <1>;
+				pr_number   = <1293981>;
+				config = [
+					33 32 00 08 00 7F 03 1E
+					05 09 00 01 01 00 10 54
+					06 40 0B 02 14 1E 05 50
+					18 28 1E 03 01 3C 1B 01
+					1A 01 14 4E 3D 52 C4 B6
+					C5 C7 00 C0 00 00 00 00
+					0A 04 B7 00 00 00 00 00
+					00 19 01 00 0A 17 0D 0A
+					00 14 0A 40 78 07 F6 C8
+					C0 43 2A 05 00 00 00 00
+					54 40 B6 3C 32 00 00 00
+					54 40 B6 1E 05 00 02 FA
+					00 80 03 0E 1F 11 50 00
+					14 04 1B 00 10 0A 60 60
+					60 68 48 48 28 20 2E 2B
+					29 28 26 23 21 1F 00 00
+					00 00 02 08 0E 17 00 7C
+					15 00 64 00 C8 00 CD 0A
+					CD 4C 1D 00 C0 19 02 02
+					04 02 03 03 03 02 10 10
+					30 10 20 20 20 10 39 3D
+					60 43 5E 64 6A 56 00 96
+					00 10 28 00 00 01 08 0E
+					14 19 1C 1F 23 04 31 04
+					40 10 00 00 00 00 00 00
+					00 00 00 00 00 FF FF FF
+					FF FF FF FF FF FF FF FF
+					FF FF FF FF FF 51 51 51
+					51 51 51 51 51 CD 0D 04
+					00 11 14 12 0F 0E 09 0A
+					07 02 01 00 03 08 0C 0D
+					0B 15 17 16 18 19 1A 1B
+					FF FF FF FF 12 0F 10 0E
+					08 07 0C 01 06 02 05 04
+					0A FF FF FF 00 10 00 10
+					00 10 00 10 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 5A 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 00
+					0F 01 4F 53
+				];
+			};
+
+			config0 {
+				default_cfg = <1>;
+				sensor_id   = <0>;
+				pr_number   = <5555>;
+				config = [
+					30 32 30 30 84 0F 03 1E
+					05 20 B1 00 0B 19 19 00
+					00 54 06 40 0B 1E 05 2D
+					F6 04 EA 01 01 19 01 15
+					01 14 4E 0A 53 D8 C4 24
+					CD 00 70 00 00 00 00 0A
+					04 C0 00 02 1E 01 80 01
+					0D 1E 00 35 00 19 04 1E
+					00 10 0A 00 11 14 12 0F
+					0E 09 0A 07 02 01 00 03
+					08 0C 0D 0B 15 17 16 18
+					19 1A 1B FF FF FF FF 12
+					0F 10 0E 08 07 0C 01 06
+					02 05 04 0A FF FF FF C0
+					C0 C0 C0 C0 C0 C0 C0 60
+					5F 5D 5B 59 57 56 53 00
+					02 04 06 08 0A 0C 0F 00
+					FF FF FF FF FF FF FF FF
+					FF 00 FF FF 00 C0 80 00
+					10 00 10 00 10 00 10 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 80 80 80 80 80 80
+					80 80 02 02 02 02 02 02
+					02 02 20 20 20 20 20 20
+					20 20 5B 5E 60 62 64 66
+					68 6B 19 15 00 1E 19 05
+					01 01 3D 08
+					];
+			};
+		};
+	};
+
+        i2c@f9925000 {
+                compass_akm8963@d {
+                        compatible = "htc_compass,akm8963";
+                        reg = <0xd>;
+                        interrupt-parent = <&msmgpio>;
+                        interrupts = <64 0x0>;
+                        SR_1v8-supply = <&pm8941_l10>;
+                        SR_2v85-supply = <&pm8941_l18>;
+                        compass_akm8963,layout     = <5>;
+                        compass_akm8963,outbit     = <1>;
+                        compass_akm8963,gpio_DRDY  = <&msmgpio 64 0x00>;
+                        compass_akm8963,gpio_RST   = <0>;
+                };
+        };
+
+	i2c@f9925000 {
+		g_sensor_bma250@18 {
+			compatible = "htc_g_sensor,bma250_bosch";
+			reg = <0x18>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <68 0x0>;
+			SR_1v8-supply = <&pm8941_l10>;
+			SR_2v85-supply = <&pm8941_l18>;
+			g_sensor_bma250,intr        = <&msmgpio 68 0x00>;
+			g_sensor_bma250,chip_layout = <1>;
+			g_sensor_bma250,axis_map_x  = <0>;
+			g_sensor_bma250,axis_map_y  = <1>;
+			g_sensor_bma250,axis_map_z  = <2>;
+			g_sensor_bma250,negate_x    = <1>;
+			g_sensor_bma250,negate_y    = <0>;
+			g_sensor_bma250,negate_z    = <1>;
+		};
+	};
+
+	i2c@f9925000 {
+		gyro_r3gd20@68 {
+			compatible = "htc_gyro,r3gd20";
+			reg = <0x68>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <66 0x0>;
+			SR_1v8-supply = <&pm8941_l10>;
+			SR_2v85-supply = <&pm8941_l18>;
+			gyro_r3gd20,fs_range    = <0x30>;
+			gyro_r3gd20,axis_map_x  = <0>;
+			gyro_r3gd20,axis_map_y  = <1>;
+			gyro_r3gd20,axis_map_z  = <2>;
+			gyro_r3gd20,negate_x    = <1>;
+			gyro_r3gd20,negate_y    = <0>;
+			gyro_r3gd20,negate_z    = <1>;
+			gyro_r3gd20,poll_interval = <50>;
+			gyro_r3gd20,min_interval = <2>;
+		};
+	};
+
+	i2c@f9925000 {
+		gyro_mpu3050@68 {
+			compatible = "htc_gyro,mpu3050";
+			reg = <0x68>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <66 0x0>;
+			SR_1v8-supply = <&pm8941_l10>;
+			SR_2v85-supply = <&pm8941_l18>;
+			gyro_mpu3050,int_config               = <0x10>;
+			gyro_mpu3050,orientation              = <2 0 0 0 1 0 0 0 2>;
+			gyro_mpu3050,gpio_intr                = <&msmgpio 66 0x00>;
+			gyro_mpu3050,level_shifter            = <0>;
+			gyro_mpu3050,accel__get_slave_descr   = <3>;
+			gyro_mpu3050,accel__adapt_num         = <5>;
+			gyro_mpu3050,accel__bus               = <1>;
+			gyro_mpu3050,accel__address           = <0x18>;
+			gyro_mpu3050,accel__orientation       = <2 0 0 0 1 0 0 0 2>;
+			gyro_mpu3050,compass__get_slave_descr = <2>;
+			gyro_mpu3050,compass__adapt_num       = <5>;
+			gyro_mpu3050,compass__bus             = <0>;
+			gyro_mpu3050,compass__address         = <0xD>;
+			gyro_mpu3050,compass__orientation     = <2 0 0 0 1 0 0 0 2>;
+		};
+	};
+
+        i2c@f9925000 {
+                g_sensor_lsm330@1e {
+                        compatible = "htc_g_sensor,lsm330";
+                        reg = <0x1e>;
+                        interrupt-parent = <&msmgpio>;
+                        interrupts = <68 0x0>;
+                        g_sensor_lsm330,fs_range    = <0x0>;
+                        g_sensor_lsm330,poll_interval = <1>;
+                        g_sensor_lsm330,min_interval = <1>;
+                        g_sensor_lsm330,rot_matrix_index = <4>;
+                        g_sensor_lsm330,chip_layout = <0>;
+                        g_sensor_lsm330,gpio_int1 = <0>;
+                        g_sensor_lsm330,gpio_int2 = <0>;
+                };
+        };
+
+        i2c@f9925000 {
+                gyro_lsm330@6a {
+                        compatible = "htc_gyro,lsm330";
+                        reg = <0x6a>;
+                        interrupt-parent = <&msmgpio>;
+                        interrupts = <66 0x0>;
+                        gyro_lsm330,fs_range    = <0x30>;
+                        gyro_lsm330,poll_interval = <100>;
+                        gyro_lsm330,min_interval = <2>;
+                        gyro_lsm330,rot_matrix_index = <4>;
+                        gyro_lsm330,gpio_int1 = <0>;
+                        gyro_lsm330,gpio_int2 = <0>;
+                };
+        };
+	i2c@f9925000 {
+		cm3629@60 {
+			compatible = "CM3629";
+			reg = <0x60>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <86 0x02>;
+			interrupt-names = "cm3629";
+			cm3629,irq-gpio = <&msmgpio 86 0x00>;
+			cm3629,model = <0>;
+			cm3629,ps_select = <1>;
+			cm3629,levels = < 13 50 76 392 771 3850 6153 6964 18536 65535>;
+			cm3629,golden_adc = <0x1159>;
+			cm3629,cm3629_slave_address = <0x60>;
+			cm3629,ps1_thd_set = <0x15>;
+			cm3629,ps1_thd_no_cal = <0x5f>;
+			cm3629,ps1_thd_with_cal = <0xD>;
+			cm3629,ps_calibration_rule = <1>;
+			cm3629,dynamical_threshold = <1>;
+			cm3629,dark_level = <3>;
+			cm3629,ps_duty = <0>;
+			cm3629,ps_it = <2>;
+			cm3629,ps_pers = <1>;
+			cm3629,ps_itb = <1>;
+			cm3629,ps_itr = <0>;
+			SR_2v85-supply = <&pm8941_l18>;
+		};
+	};
+
+	i2c@f9925000 {
+		nxp_pn544_nfc@28 {
+			compatible = "nxp,pn544-nfc";
+			reg = <0x28>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <24 0x4>;
+			nxp,ven-gpio = <&msmgpio 25 0x00>;
+			nxp,irq-gpio = <&msmgpio 24 0x00>;
+			nxp,fwdl-gpio = <&msmgpio 26 0x00>;
+			nxp,ven_isinvert = <1>;
+		};
+        };
+
+	i2c@f9928000 {
+		sii9234@72 {
+			compatible = "mhl-sii9234";
+			reg = <0x72>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <77 0x8>;
+			mhl-intr-gpio = <&msmgpio 77 0>;
+			mhl-rst-gpio = <&msmgpio 78 0>;
+			avcc_33-supply = <&pm8941_l22>;
+			avcc_12-supply = <&pm8941_l3>;
+			hpd_5v-supply = <&pm8941_mvs1>; /* Mapping to PM8941 pad name 5vs2 in GPIO table. */
+			qcom,hdmi-tx-map = <&mdss_hdmi_tx>;
+			mhl-ci2ca = <0>;
+		};
+	};
+
+	i2c@f9967000 {
+		isa1200@48 {
+			status = "okay";
+			reg = <0x48>;
+			vcc_i2c-supply = <&pm8941_s3>;
+			compatible = "imagis,isa1200";
+			label = "vibrator";
+			imagis,chip-en;
+			imagis,need-pwm-clk;
+			imagis,ext-clk-en;
+			imagis,hap-en-gpio = <&msmgpio 86 0x00>;
+			imagis,max-timeout = <15000>;
+			imagis,pwm-div = <256>;
+			imagis,mode-ctrl = <2>;
+			imagis,regulator {
+				regulator-name = "vcc_i2c";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-max-microamp = <9360>;
+			};
+		};
+	};
+
+	i2c@f9925000 {
+		tps61310@33 {
+			compatible = "TPS61310_FLASHLIGHT";
+			reg = <0x33>;
+			tps61310,tps61310_strb0 = <&pm8941_gpios 26 0x00>;
+			tps61310,tps61310_strb1 = <&pm8941_gpios 27 0x00>;
+			tps61310,flash_duration_ms = <600>;
+			tps61310,enable_FLT_1500mA = <1>;
+			tps61310,led_count = <1>;
+			tps61310,disable_tx_mask = <1>;
+		};
+	};
+
+	spi@f9923000 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		ethernet-switch@2 {
+			compatible = "micrel,ks8851";
+			reg = <2>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <94 0>;
+			spi-max-frequency = <4800000>;
+			rst-gpio = <&pm8941_mpps 6 0>;
+			vdd-io-supply = <&spi_eth_vreg>;
+			vdd-phy-supply = <&spi_eth_vreg>;
+		};
+	};
+
+	gpio_event {
+		compatible = "key,gpio-event";
+		names = "device-keypad";
+		clr_gpio = <&msmgpio 88 0>;
+
+		key0 {
+			gpio    = <&msmgpio 27 3>;
+			keycode = <114>;	//vDN
+		};
+		key1 {
+			gpio    = <&msmgpio 28 3>;
+			keycode = <115>;	//vUP
+		};
+		key2 {
+			gpio    = <&msmgpio 95 3>;
+			keycode = <116>;	//pwr
+		};
+	};
+
+	headset_mgr {
+		compatible   = "htc_headset,mgr";
+		mgr,tx_gpio  = <&msmgpio 8 0>;
+		mgr,rx_gpio  = <&msmgpio 9 0>;
+		mgr,oe_gpio  = <&msmgpio 96 0>;
+		mgr,bias_gpio  = <&pm8941_gpios 7 0>;
+		mgr,wire_alt = <2>;	/*uart alt*/
+	};
+
+	headset_pmic {
+		compatible = "htc_headset,pmic";
+		interrupt-parent = <&msmgpio>;
+		hs_pmic,key_gpio 	= <&msmgpio 9 0x00>;
+		hs_pmic,driver_flag     = <4>;
+		hs_pmic,hpin_gpio       = <&msmgpio 65 0x00>;
+		hs_pmic,hpin_irq        = <>;
+		hs_pmic,key_irq         = <0>;
+		hs_pmic,key_enable_gpio = <0>;
+		hs_pmic,adc_mic         = <0>;
+		hs_pmic,adc_remote      = <0 56 57 146 147 339>;
+		hs_pmic,adc_channel	= <56>;		//LR_MUX9_AMUX_THM5
+		hs_pmic,adc_mpp         = <0>;
+		hs_pmic,adc_amux        = <0>;
+		hs_pmic,hs_controller   = <0>;
+		hs_pmic,hs_switch       = <0>;
+		qcom,headset-vadc 	= <&pm8941_vadc>;
+	};
+
+	headset_onewire {
+		compatible = "htc_headset,1wire";
+		hs_1wire,tx_level_shift_en = <&msmgpio 96 0x00>;
+		hs_1wire,one_wire_remote = <0x7E 0x7F 0x7D 0x7F 0x7B 0x7F>;
+		hs_1wire,onewire_tty_dev = "ttyHSL1";
+	};
+
+	hall_ak8789 {
+		compatible = "hall_sensor,ak8789";
+		hall,att_used = <1>;
+		hall,att_gpio = <&pm8941_gpios 2 0>;
+	};
+
+	keyreset {
+		compatible = "keyreset_driver";
+		keyreset,driver_state = "enable";
+	};
+/*Audio config start*/
+	sound {
+		qcom,model = "msm8974-taiko-mtp-snd-card";
+		qcom,cdc-micbias2-headset-only;
+
+		qcom,audio-routing =
+			"RX_BIAS", "MCLK",
+			"LDO_H", "MCLK",
+			"Lineout_1 amp", "LINEOUT1",
+			"Lineout_3 amp", "LINEOUT3",
+			"Lineout_2 amp", "LINEOUT2",
+			"Lineout_4 amp", "LINEOUT4",
+			"AIF4 MAD", "MCLK",
+			"AMIC1", "MIC BIAS1 Internal1",
+			"MIC BIAS1 Internal1", "Handset Mic",
+			"AMIC2", "MIC BIAS2 External",
+			"MIC BIAS2 External", "Headset Mic",
+			"AMIC3", "MIC BIAS3 Internal1",
+			"MIC BIAS3 Internal1", "ANCRight Headset Mic",
+			"AMIC4", "MIC BIAS2 External",
+			"MIC BIAS2 External", "ANCLeft Headset Mic",
+			"DMIC1", "MIC BIAS1 External",
+			"MIC BIAS1 External", "Digital Mic1",
+			"DMIC2", "MIC BIAS1 Internal1",
+			"MIC BIAS1 Internal1", "Digital Mic2",
+			"DMIC3", "MIC BIAS3 External",
+			"MIC BIAS3 External", "Digital Mic3",
+			"DMIC4", "MIC BIAS3 Internal1",
+			"MIC BIAS3 Internal1", "Digital Mic4",
+			"DMIC5", "MIC BIAS3 Internal1",
+			"MIC BIAS3 Internal1", "Digital Mic5",
+			"DMIC6", "MIC BIAS3 Internal1",
+			"MIC BIAS3 Internal1", "Digital Mic6";
+
+		qcom,prim-auxpcm-gpio-clk  = <>;
+		qcom,prim-auxpcm-gpio-sync = <>;
+		qcom,prim-auxpcm-gpio-din  = <>;
+		qcom,prim-auxpcm-gpio-dout = <>;
+		qcom,sec-auxpcm-gpio-clk  = <>;
+		qcom,sec-auxpcm-gpio-sync = <>;
+		qcom,sec-auxpcm-gpio-din  = <>;
+		qcom,sec-auxpcm-gpio-dout = <>;
+
+		mi2s-gpio-sck   = <&msmgpio 58 0>;
+		mi2s-gpio-ws    = <&msmgpio 59 0>;
+		mi2s-gpio-sda0  = <&msmgpio 60 0>;
+		mi2s-gpio-sda1  = <&msmgpio 61 0>;
+		mi2s-afe-portid = <0x1006>;
+
+		rcv-gpio-sel    = <&msmgpio 57 0>;
+		rcv-gpio-en     = <&msmgpio 103 0>;
+		wcd-intr-gpio     = <&msmgpio 93 0>;
+		qcom,hdmi-audio-rx;
+		htc,audio_use_dmic;
+	};
+
+       i2c@f9928000 {
+               nxp_tfa9887_amp@34 {
+                       compatible = "nxp,tfa9887-amp";
+                       reg = <0x34>;
+               };
+               nxp_tfa9887l_amp@35 {
+                       compatible = "nxp,tfa9887l-amp";
+                       reg = <0x35>;
+               };
+               richteck_rt5501_amp@52 {
+                       compatible = "richtek,rt5506-amp";
+                       reg = <0x52>;
+                       richtek,enable-gpio = <&msmgpio 62 0x00>;
+                       power_supply = "8941_s3";
+
+               };
+
+       };
+
+	qcom,msm-dai-mi2s {
+		qcom,msm-dai-q6-mi2s-quat {
+			compatible = "qcom,msm-dai-q6-mi2s";
+			qcom,msm-dai-q6-mi2s-dev-id = <3>;
+			qcom,msm-mi2s-rx-lines = <1>;
+			qcom,msm-mi2s-tx-lines = <2>;
+		};
+	};
+
+/*Audio config end*/
+
+};
+
+&spmi_bus {
+	qcom,pm8941@1 {
+		qcom,leds@d800 {
+			status = "okay";
+			qcom,wled_0 {
+				label = "wled";
+				linux,name = "wled:backlight";
+				linux,default-trigger = "bkl-trigger";
+				qcom,cs-out-en;
+				qcom,op-fdbck = <0>;
+				qcom,default-state = "keep";
+				qcom,max-current = <19>;
+				qcom,ctrl-delay-us = <0>;
+				qcom,boost-curr-lim = <5>;
+				qcom,cp-sel = <0>;
+				qcom,switch-freq = <11>;
+				qcom,ovp-val = <2>;
+				qcom,num-strings = <2>;
+				qcom,cabc-en = <1>;
+				qcom,id = <0>;
+			};
+		};
+
+		qcom,leds@d900 {
+			status = "disabled";
+		};
+
+		qcom,leds@da00 {
+			status = "disabled";
+		};
+
+		qcom,leds@db00 {
+			status = "disabled";
+		};
+
+		qcom,leds@dc00 {
+			status = "disabled";
+		};
+
+		qcom,leds@dd00 {
+			status = "disabled";
+		};
+
+		qcom,leds@de00 {
+			status = "disabled";
+		};
+
+		qcom,leds@df00 {
+			status = "disabled";
+		};
+
+		qcom,leds@e000 {
+			status = "disabled";
+		};
+
+		qcom,leds@e100 {
+			status = "disabled";
+		};
+	};
+};
+
+&sdcc1 {
+       status = "disabled";
+};
+
+&sdcc2 {
+	#address-cells = <0>;
+	interrupt-parent = <&sdcc2>;
+	interrupts = <0 1 2>;
+	#interrupt-cells = <1>;
+	interrupt-map-mask = <0xffffffff>;
+	interrupt-map = <0 &intc 0 125 0
+			1 &intc 0 220 0
+			2 &msmgpio 62 0x3>;
+	interrupt-names = "core_irq", "bam_irq", "status_irq";
+	cd-gpios = <&msmgpio 62 0x1>;
+	status = "disabled";
+};
+
+&sdhc_1 {
+	vdd-supply = <&pm8941_l20>;
+	vdd-io-supply = <&pm8941_s3>;
+
+	qcom,vdd-always-on;
+	qcom,vdd-lpm-sup;
+	qcom,vdd-voltage-level = <2950000 2950000>;
+	qcom,vdd-current-level = <800 500000>;
+
+	qcom,vdd-io-always-on;
+	qcom,vdd-io-voltage-level = <1800000 1800000>;
+	qcom,vdd-io-current-level = <250 154000>;
+
+	qcom,pad-pull-on = <0x0 0x3 0x3>; /* no-pull, pull-up, pull-up */
+	qcom,pad-pull-off = <0x0 0x3 0x3>; /* no-pull, pull-up, pull-up */
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+	qcom,pad-drv-off = <0x0 0x0 0x0>; /* 2mA, 2mA, 2mA */
+
+	qcom,bus-speed-mode = "DDR_1p8v";
+
+	qcom,nonremovable;
+	htc,slot-type = <0>;
+	htc,bkops_support;
+	status = "ok";
+};
+
+&sdhc_2 {
+	#address-cells = <0>;
+	interrupt-parent = <&sdhc_2>;
+	interrupts = <0 1 2>;
+	#interrupt-cells = <1>;
+	interrupt-map-mask = <0xffffffff>;
+	interrupt-map = <0 &intc 0 125 0
+			1 &intc 0 221 0
+			2 &pm8941_gpios 1 0x3>;
+	interrupt-names = "hc_irq", "pwr_irq", "status_irq";
+	cd-gpios = <&pm8941_gpios 1 0x1>;
+
+	vdd-supply = <&pm8941_l21>;
+	vdd-io-supply = <&pm8941_l13>;
+
+	qcom,vdd-voltage-level = <2950000 2950000>;
+	qcom,vdd-current-level = <9000 800000>;
+
+	qcom,vdd-io-voltage-level = <1800000 2950000>;
+	qcom,vdd-io-current-level = <6 22000>;
+
+	qcom,pad-pull-on = <0x0 0x3 0x3>; /* no-pull, pull-up, pull-up */
+	qcom,pad-pull-off = <0x0 0x3 0x3>; /* no-pull, pull-up, pull-up */
+	qcom,pad-drv-on = <0x4 0x4 0x4>; /* 10mA, 10mA, 10mA */
+	qcom,pad-drv-off = <0x0 0x0 0x0>; /* 2mA, 2mA, 2mA */
+	htc,slot-type = <1>;
+	status = "ok";
+};
+
+/* Drive strength recommendations for clock line from hardware team is 10 mA.
+ * But since the driver has been been using the below values from the start
+ * without any problems, continue to use those.
+ */
+&sdcc1 {
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+};
+
+&sdcc2 {
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+};
+
+&sdhc_2 {
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+};
+
+&usb_otg {
+	qcom,hsusb-otg-otg-control = <2>;
+};
+
+&uart7 {
+	status = "ok";
+};
+
+&usb3 {
+	qcom,otg-capability;
+};
+
+/ {
+	glu_batterydata: qcom,battery-data {
+		qcom,rpull-up-kohm = <100>;
+		qcom,vref-batt-therm = <1800000>;
+
+		/include/ "batterydata-glu-id1.dtsi"
+		/include/ "batterydata-glu-id2.dtsi"
+		/include/ "batterydata-glu-unknown-id.dtsi"
+	};
+};
+
+&pm8941_bms {
+	qcom,use-external-rsense;
+	qcom,battery-data = <&glu_batterydata>;
+	qcom,enable-fcc-learning;
+	qcom,min-fcc-learning-soc = <20>;
+	qcom,min-fcc-ocv-pc = <30>;
+	qcom,min-fcc-learning-samples = <5>;
+	qcom,fcc-resolution = <13>;
+	status = "ok";
+};
+
+&pm8941_chg {
+	qcom,vddmax-mv = <4350>;
+	qcom,vddsafe-mv = <4360>;
+	qcom,vinmin-mv = <4400>;
+	qcom,ibatmax-ma = <1750>;
+	qcom,cold-threshold = <1>;
+	qcom,hot-threshold = <0>;
+	qcom,ibatterm-ma = <320>;
+	qcom,ibatsafe-ma = <1750>;
+	qcom,thermal-mitigation = <1500 700 600 325>;
+	qcom,cool-bat-decidegc = <0>;
+	qcom,cool-bat-mv = <4350>;
+	qcom,ibatmax-warm-ma = <1750>;
+	qcom,warm-bat-decidegc = <480>;
+	qcom,warm-bat-mv = <4100>;
+	qcom,ibatmax-cool-ma = <1750>;
+	qcom,vbatdet-delta-mv = <100>;
+	qcom,resume-soc = <99>;
+	qcom,tchg-mins = <960>;
+	qcom,chg-vadc = <&pm8941_vadc>;
+	qcom,chg-adc_tm = <&pm8941_adc_tm>;
+	qcom,eoc-ibat-thre-ma = <50>;
+	qcom,is-embeded-batt = <1>;
+	qcom,regulate-vin-min-thr-mv = <4150>;
+	qcom,lower-vin-min = <4300>;
+
+	status = "ok";
+	qcom,charging-disabled;
+	qcom,pm8921-aicl-enabled;
+	qcom,qc20-chg-enabled;
+	qcom,enable-qct-adjust-vddmax;
+
+	qcom,chgr@1000 {
+		status = "ok";
+	};
+
+	qcom,buck@1100 {
+		status = "ok";
+	};
+
+	qcom,bat-if@1200 {
+		status = "ok";
+	};
+
+	qcom,usb-chgpth@1300 {
+		status = "ok";
+	};
+
+	qcom,dc-chgpth@1400 {
+		status = "ok";
+	};
+
+	qcom,boost@1500 {
+		status = "ok";
+	};
+
+	qcom,chg-misc@1600 {
+		status = "ok";
+	};
+};
+
+&slim_msm {
+	taiko_codec {
+		qcom,cdc-micbias1-ext-cap;
+		qcom,cdc-micbias2-ext-cap;
+		qcom,cdc-micbias4-ext-cap;
+	};
+};
+/*&spi_epm {
+	epm-adc@0 {
+		compatible = "cy,epm-adc-cy8c5568lti-114";
+		reg = <0>;
+		interrupt-parent = <&msmgpio>;
+		spi-max-frequency = <960000>;
+		qcom,channels = <31>;
+		qcom,gain = <100 100 100 50 100 100 1 100 1 50
+				1 100 1 100 50 50 50 50 50 50
+				100 50 100 50 50 50 50 50 50 50
+				50>;
+		qcom,rsense = <2 2 2 200 20 2 1 2 1 30
+				1 10 1 30 50 30 500 30 100 30
+				100 500 20 200 1000 20 1000 1000 70 200
+				50>;
+		qcom,channel-type = <0x1540>;
+	};
+};*/

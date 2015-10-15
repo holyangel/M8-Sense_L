@@ -53,7 +53,7 @@ static void __kpss_mux_set_sel(struct mux_clk *mux, int sel)
 	set_l2_indirect_reg(mux->offset, regval);
 	spin_unlock_irqrestore(&kpss_clock_reg_lock, flags);
 
-	
+	/* Wait for switch to complete. */
 	mb();
 	udelay(1);
 }
@@ -95,6 +95,10 @@ struct clk_mux_ops clk_mux_ops_kpss = {
 	.get_mux_sel = kpss_mux_get_sel,
 };
 
+/*
+ * The divider can divide by 2, 4, 6 and 8. But we only really need div-2. So
+ * force it to div-2 during handoff and treat it like a fixed div-2 clock.
+ */
 static int kpss_div2_get_div(struct div_clk *div)
 {
 	unsigned long flags;
@@ -123,6 +127,7 @@ struct clk_div_ops clk_div_ops_kpss_div2 = {
 
 #define LOCK_BIT	BIT(16)
 
+/* Initialize a HFPLL at a given rate and enable it. */
 static void __hfpll_clk_init_once(struct clk *c)
 {
 	struct hfpll_clk *h = to_hfpll_clk(c);
@@ -131,7 +136,7 @@ static void __hfpll_clk_init_once(struct clk *c)
 	if (likely(h->init_done))
 		return;
 
-	
+	/* Configure PLL parameters for integer mode. */
 	if (hd->config_val)
 		writel_relaxed(hd->config_val, h->base + hd->config_offset);
 	writel_relaxed(0, h->base + hd->m_offset);
@@ -143,7 +148,7 @@ static void __hfpll_clk_init_once(struct clk *c)
 
 		rate = readl_relaxed(h->base + hd->l_offset) * h->src_rate;
 
-		
+		/* Pick the right VCO. */
 		if (hd->user_vco_mask && rate > hd->low_vco_max_rate)
 			regval |= hd->user_vco_mask;
 		writel_relaxed(regval, h->base + hd->user_offset);
@@ -155,6 +160,7 @@ static void __hfpll_clk_init_once(struct clk *c)
 	h->init_done = true;
 }
 
+/* Enable an already-configured HFPLL. */
 static int hfpll_clk_enable(struct clk *c)
 {
 	struct hfpll_clk *h = to_hfpll_clk(c);
@@ -165,16 +171,20 @@ static int hfpll_clk_enable(struct clk *c)
 
 	__hfpll_clk_init_once(c);
 
-	
+	/* Disable PLL bypass mode. */
 	writel_relaxed(0x2, h->base + hd->mode_offset);
 
+	/*
+	 * H/W requires a 5us delay between disabling the bypass and
+	 * de-asserting the reset. Delay 10us just to be safe.
+	 */
 	mb();
 	udelay(10);
 
-	
+	/* De-assert active-low PLL reset. */
 	writel_relaxed(0x6, h->base + hd->mode_offset);
 
-	
+	/* Wait for PLL to lock. */
 	if (hd->status_offset) {
 		while (!(readl_relaxed(h->base + hd->status_offset) & LOCK_BIT))
 			;
@@ -183,10 +193,10 @@ static int hfpll_clk_enable(struct clk *c)
 		udelay(60);
 	}
 
-	
+	/* Enable PLL output. */
 	writel_relaxed(0x7, h->base + hd->mode_offset);
 
-	
+	/* Make sure the enable is done before returning. */
 	mb();
 
 	return 0;
@@ -197,6 +207,10 @@ static void hfpll_clk_disable(struct clk *c)
 	struct hfpll_clk *h = to_hfpll_clk(c);
 	struct hfpll_data const *hd = h->d;
 
+	/*
+	 * Disable the PLL output, disable test mode, enable the bypass mode,
+	 * and assert the reset.
+	 */
 	writel_relaxed(0, h->base + hd->mode_offset);
 }
 
@@ -219,6 +233,10 @@ static long hfpll_clk_round_rate(struct clk *c, unsigned long rate)
 	return rrate;
 }
 
+/*
+ * For optimization reasons, assumes no downstream clocks are actively using
+ * it.
+ */
 static int hfpll_clk_set_rate(struct clk *c, unsigned long rate)
 {
 	struct hfpll_clk *h = to_hfpll_clk(c);
@@ -239,7 +257,7 @@ static int hfpll_clk_set_rate(struct clk *c, unsigned long rate)
 	if (c->count)
 		hfpll_clk_disable(c);
 
-	
+	/* Pick the right VCO. */
 	if (hd->user_offset && hd->user_vco_mask) {
 		u32 regval;
 		regval = readl_relaxed(h->base + hd->user_offset);
@@ -272,7 +290,7 @@ static enum handoff hfpll_clk_handoff(struct clk *c)
 	if (!h->base)
 		return HANDOFF_DISABLED_CLK;
 
-	
+	/* Assume parent rate doesn't change and cache it. */
 	h->src_rate = clk_get_rate(c->parent);
 	l_val = readl_relaxed(h->base + hd->l_offset);
 	c->rate = l_val * h->src_rate;
@@ -363,6 +381,10 @@ static enum handoff kpss_cpu_handoff(struct clk *c)
 
 	c->rate = clk_get_rate(c->parent);
 
+	/*
+	 * Don't unnecessarily turn on the parents for an offline CPU and
+	 * then have them turned off at late init.
+	 */
 	return (cpu_online(cpu->id) ?
 		HANDOFF_ENABLED_CLK : HANDOFF_DISABLED_CLK);
 }
@@ -411,6 +433,10 @@ static int kpss_core_set_rate(struct clk *c, unsigned long rate)
 	struct kpss_core_clk *cpu = to_kpss_core_clk(c);
 	int ret = 0;
 
+	/* L2 uses this function to set its rate as well and L2 id is not set, says 0.
+	 * We cannot use id to identify whether it is cpu0 or L2.
+	 * The only way to tell the difference is check cp15_iaddr, only L2 sets this field.
+	 */
 	if (c->flags & CLKFLAG_CPU_CLK)
 		set_acpuclk_footprint(cpu->id, ACPU_BEFORE_SET_SPEED);
 
@@ -440,6 +466,11 @@ static void kpss_cpu_post_set_rate(struct clk *c, unsigned long old_rate)
 	set_acpuclk_footprint(cpu->id, ACPU_BEFORE_AVS_ENABLE);
 #endif
 
+	/*
+	 * FIXME: If AVS enable/disable needs to be done in the
+	 * enable/disable op to correctly handle power collapse, then might
+	 * need to grab the spinlock here.
+	 */
 	if (dscr)
 		AVS_ENABLE(cpu->id, dscr);
 }
@@ -492,6 +523,10 @@ static void kpss_l2_disable_hwcg(struct clk *c)
 	u32 regval;
 	unsigned long flags;
 
+	/*
+	 * NOTE: Should not be called when HW clock gating is already
+	 * disabled.
+	 */
 	spin_lock_irqsave(&kpss_clock_reg_lock, flags);
 	regval = get_l2_indirect_reg(l2->cp15_iaddr);
 	l2->l2_slp_delay = regval & (SLPDLY_MASK << SLPDLY_SHIFT);
